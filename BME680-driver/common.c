@@ -13,7 +13,7 @@
  * Linux specific configuration. Adjust the following define to the device path
  * of your sensor.
  */
-#define I2C_DEVICE_PATH "/dev/i2c-1"
+#define I2C_DEVICE_PATH "/dev/i2c-2"
 
 /**
  * The following define was taken from i2c-dev.h. Alternatively the header file
@@ -143,6 +143,9 @@ int16_t i2c_hal_init(void) {
     }
 
     i2c_address = BME68X_I2C_ADDR_LOW;
+    if (ioctl(i2c_device, I2C_SLAVE, BME68X_I2C_ADDR_LOW) < 0) {
+        printf("ioctl error");
+    }
 
     int8_t rslt = BME68X_OK;
 

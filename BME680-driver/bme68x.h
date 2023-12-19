@@ -208,7 +208,7 @@ uint32_t bme68x_get_meas_dur(const uint8_t op_mode, struct bme68x_conf *conf, st
  * \ingroup bme68xApiData
  * \page bme68x_api_bme68x_get_data bme68x_get_data
  * \code
- * int8_t bme68x_get_data(uint8_t op_mode, struct bme68x_data *data, uint8_t *n_data, struct bme68x_dev *dev);
+ * int8_t bme68x_get_data(uint8_t op_mode, struct  *data, uint8_t *n_data, struct bme68x_dev *dev);
  * \endcode
  * @details This API reads the pressure, temperature and humidity and gas data
  * from the sensor, compensates the data and store it in the bme68x_data
