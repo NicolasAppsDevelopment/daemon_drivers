@@ -6,7 +6,11 @@ extern "C" {
  * Initialize all hard- and software components that are needed for the I2C
  * communication.
  */
-int16_t i2c_hal_init(void);
+int i2c_hal_init(void);
+
+int bme680_self_test(void);
+
+int bme680_get_measure(float* t, float* p, float* h, float* g);
 
 /**
  * Release all resources initialized by sensirion_i2c_hal_init().

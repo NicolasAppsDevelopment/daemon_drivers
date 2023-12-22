@@ -53,25 +53,30 @@ string initSensor() {
     sensirion_i2c_hal_free();
     error = sensirion_i2c_hal_init();
     if (error) {
-        return formatError("Error executing sensirion_i2c_hal_init(): " + to_string(error));
+        return formatError("Impossible d'initialiser la communication avec le capteur STC31. La fonction \"sensirion_i2c_hal_init\" a retourné le code d'erreur : " + to_string(error));
     }
 
     uint16_t self_test_output;
     error = stc3x_self_test(&self_test_output);
     if (error) {
-        return formatError("Error executing stc3x_self_test(): " + to_string(error));
+        return formatError("L'auto-test du capteur STC31 a échoué. La fonction \"stc3x_self_test\" a retourné le code d'erreur : " + to_string(error));
     }
 
     error = stc3x_set_binary_gas(0x0001);
     if (error) {
-        return formatError("Error executing stc3x_set_binary_gas(): " + to_string(error));
+        return formatError("La défénition du mode de relève du CO2 a échoué. La fonction \"stc3x_set_binary_gas\" a retourné le code d'erreur : " + to_string(error));
     }
 
     /* BME680 init */
     i2c_hal_free();
     error = i2c_hal_init();
     if (error) {
-        return formatError("Error executing i2c_hal_init(): " + to_string(error));
+        return formatError("Impossible d'initialiser la communication avec le capteur BME680. La fonction \"i2c_hal_init\" a retourné le code d'erreur : " + to_string(error));
+    }
+
+    error = bme680_self_test();
+    if (error) {
+        return formatError("L'auto-test du capteur BME680 a échoué. La fonction \"bme680_self_test\" a retourné le code d'erreur : " + to_string(error));
     }
 
     return formatSuccess();
@@ -123,11 +128,31 @@ string getSensorMeasure() {
     error = stc3x_measure_gas_concentration(&gas_ticks, &temperature_ticks);
     if (error) {
         return formatError("Error executing stc3x_measure_gas_concentration(): " + to_string(error));
-    } else {
-        gas = 100 * ((float)gas_ticks - 16384.0) / 32768.0;
-        temperature = (float)temperature_ticks / 200.0;
-        return formatSendData(gas, temperature);
     }
+
+    gas = 100 * ((float)gas_ticks - 16384.0) / 32768.0;
+    temperature = (float)temperature_ticks / 200.0;
+
+
+    float temperature2;
+    float humidity;
+    float pressure;
+    float gas2;
+
+    error = bme680_get_measure(&temperature2, &humidity, &pressure, &gas2);
+    if (error) {
+        return formatError("Error executing bme680_get_measure(): " + to_string(error));
+    }
+
+    cout << "--------------------" << endl;
+    cout << " GAS: " << gas << endl;
+    cout << " TEMP: " << temperature << endl;
+    cout << " TEMP2: " << temperature2 << endl;
+    cout << " HUMID: " << humidity << endl;
+    cout << " PRESS: " << pressure << endl;
+    cout << " GAS2: " << gas2 << endl;
+
+    return formatSendData(gas, temperature);
 }
 
 // Handle client requests

@@ -172,7 +172,7 @@ void bme68x_check_rslt(const char api_name[], int8_t rslt)
  * Initialize all hard- and software components that are needed for the I2C
  * communication.
  */
-int16_t i2c_hal_init(void) {
+int i2c_hal_init(void) {
     /* open i2c adapter */
     i2c_device = open(I2C_DEVICE_PATH, O_RDWR);
     if (i2c_device == -1) {
@@ -196,12 +196,12 @@ int16_t i2c_hal_init(void) {
     rslt = bme68x_init(&bme_api_dev);
     bme68x_check_rslt("bme68x_init",rslt);
 
-    bme688_set_mode_forced();//default mode, can be overridden by bme688_set_mode()
+    rslt = bme680_set_mode_forced();//default mode, can be overridden by bme688_set_mode()
 
     return (int)rslt;
 }
 
-void bme688_set_mode_forced(){
+int bme680_set_mode_forced(){
     int8_t rslt = BME68X_OK;
 
     conf.filter = BME68X_FILTER_OFF;
@@ -217,6 +217,8 @@ void bme688_set_mode_forced(){
     heatr_conf.heatr_dur = 100;
     rslt = bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf,&bme_api_dev);
     bme68x_check_rslt("bme68x_set_heatr_conf",rslt);
+
+    return (int)rslt;
 }
 
 /**
@@ -228,4 +230,53 @@ void i2c_hal_free(void) {
         i2c_device = -1;
         i2c_address = 0;
     }
+}
+
+
+int bme680_self_test() {
+    int8_t rslt;
+
+    rslt = bme68x_selftest_check(&bme_api_dev);
+    bme68x_check_rslt("bme68x_selftest_check", rslt);
+
+    if (rslt == BME68X_OK)
+    {
+        printf("Self-test passed\n");
+    }
+
+    if (rslt == BME68X_E_SELF_TEST)
+    {
+        printf("Self-test failed\n");
+    }
+
+    return (int)rslt;
+}
+
+
+int bme680_get_measure(float* t, float* p, float* h, float* g) {
+    int8_t rslt;
+
+    rslt = bme68x_set_op_mode(BME68X_FORCED_MODE, &bme_api_dev);
+    bme68x_check_rslt("bme68x_set_op_mode", rslt);
+
+    /* Calculate delay period in microseconds */
+    uint32_t del_period;
+    del_period = bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, &bme_api_dev) + (heatr_conf.heatr_dur * 1000);
+    bme_api_dev.delay_us(del_period, bme_api_dev.intf_ptr);
+
+    /* Check if rslt == BME68X_OK, report or handle if otherwise */
+    uint8_t n_fields;
+    rslt = bme68x_get_data(BME68X_FORCED_MODE, &data, &n_fields, &bme_api_dev);
+    bme68x_check_rslt("bme68x_get_data", rslt);
+
+    if (n_fields) {
+        printf("Data received, status : 0x%x\n", data->status);
+
+        *t = data->temperature;
+        *p = data->pressure;
+        *h = data->humidity;
+        *g = data->gas_resistance;
+    }
+
+    return (int)rslt;
 }
