@@ -137,20 +137,18 @@ string getSensorMeasure() {
     float temperature2;
     float humidity;
     float pressure;
-    float gas2;
 
-    error = bme680_get_measure(&temperature2, &pressure, &humidity, &gas2);
+    error = bme680_get_measure(&temperature2, &pressure, &humidity);
     if (error) {
         return formatError("Error executing bme680_get_measure(): " + to_string(error));
     }
 
     cout << "--------------------" << endl;
     cout << " GAS: " << gas << endl;
-    cout << " TEMP: " << temperature << endl;
-    cout << " TEMP2: " << temperature2 << endl;
-    cout << " HUMID: " << humidity << endl;
-    cout << " PRESS: " << pressure << endl;
-    cout << " GAS2: " << gas2 << endl;
+    cout << " TEMP: " << temperature << "°C" << endl;
+    cout << " TEMP2: " << temperature2 << "°C" << endl;
+    cout << " HUMID: " << humidity << "%" << endl;
+    cout << " PRESS: " << pressure << "Pa" << endl;
 
     return formatSendData(gas, temperature);
 }

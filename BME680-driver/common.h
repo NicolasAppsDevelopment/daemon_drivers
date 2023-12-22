@@ -10,7 +10,7 @@ int i2c_hal_init(void);
 
 int bme680_self_test(void);
 
-int bme680_get_measure(float* t, float* p, float* h, float* g);
+int bme680_get_measure(float* t, float* p, float* h);
 
 /**
  * Release all resources initialized by sensirion_i2c_hal_init().

@@ -34,6 +34,16 @@ static int i2c_device = -1;
 static uint8_t i2c_address = 0;
 
 
+/**
+ * Execute one read transaction on the I2C bus, reading a given number of bytes.
+ * If the device does not acknowledge the read command, an error shall be
+ * returned.
+ *
+ * @param address 7-bit I2C address to read from
+ * @param data    pointer to the buffer where the data is to be stored
+ * @param count   number of bytes to read from I2C and store in the buffer
+ * @returns 0 on success, error code otherwise
+ */
 int8_t bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint16_t len, void *intf_ptr)
 {
     int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
@@ -53,6 +63,17 @@ int8_t bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint16_t len, void *
     return rslt;
 }
 
+/**
+ * Execute one write transaction on the I2C bus, sending a given number of
+ * bytes. The bytes in the supplied buffer must be sent to the given address. If
+ * the slave device does not acknowledge any of the bytes, an error shall be
+ * returned.
+ *
+ * @param address 7-bit I2C address to write to
+ * @param data    pointer to the buffer containing the data to write
+ * @param count   number of bytes to read from the buffer and send over I2C
+ * @returns 0 on success, error code otherwise
+ */
 int8_t bme68x_i2c_write(uint8_t reg_addr, uint8_t *reg_data, uint16_t len, void *intf_ptr)
 {
     int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
@@ -71,52 +92,6 @@ int8_t bme68x_i2c_write(uint8_t reg_addr, uint8_t *reg_data, uint16_t len, void 
     return rslt;
 }
 
-
-/**
- * Execute one read transaction on the I2C bus, reading a given number of bytes.
- * If the device does not acknowledge the read command, an error shall be
- * returned.
- *
- * @param address 7-bit I2C address to read from
- * @param data    pointer to the buffer where the data is to be stored
- * @param count   number of bytes to read from I2C and store in the buffer
- * @returns 0 on success, error code otherwise
-
-int8_t bme68x_i2c_read(uint8_t address, uint8_t* data, uint16_t count, void *intf_ptr) {
-    if (i2c_address != address) {
-        ioctl(i2c_device, I2C_SLAVE, address);
-        i2c_address = address;
-    }
-
-    if (read(i2c_device, data, count) != count) {
-        return I2C_READ_FAILED;
-    }
-    return 0;
-}
-
-/**
- * Execute one write transaction on the I2C bus, sending a given number of
- * bytes. The bytes in the supplied buffer must be sent to the given address. If
- * the slave device does not acknowledge any of the bytes, an error shall be
- * returned.
- *
- * @param address 7-bit I2C address to write to
- * @param data    pointer to the buffer containing the data to write
- * @param count   number of bytes to read from the buffer and send over I2C
- * @returns 0 on success, error code otherwise
-
-int8_t bme68x_i2c_write(uint8_t address, const uint8_t* data, uint16_t count, void *intf_ptr) {
-    if (i2c_address != address) {
-        ioctl(i2c_device, I2C_SLAVE, address);
-        i2c_address = address;
-    }
-
-    if (write(i2c_device, data, count) != count) {
-        return I2C_WRITE_FAILED;
-    }
-    return 0;
-}*/
-
 /**
  * Sleep for a given number of microseconds. The function should delay the
  * execution for at least the given time, but may also sleep longer.
@@ -126,14 +101,6 @@ int8_t bme68x_i2c_write(uint8_t address, const uint8_t* data, uint16_t count, vo
 void bme68x_delay_us(uint32_t useconds) {
     usleep(useconds);
 }
-
-
-
-
-
-
-
-
 
 
 void bme68x_check_rslt(const char api_name[], int8_t rslt)
@@ -253,7 +220,7 @@ int bme680_self_test() {
 }
 
 
-int bme680_get_measure(float* t, float* p, float* h, float* g) {
+int bme680_get_measure(float* t, float* p, float* h) {
     int8_t rslt;
 
     rslt = bme68x_set_op_mode(BME68X_FORCED_MODE, &bme_api_dev);
@@ -275,7 +242,6 @@ int bme680_get_measure(float* t, float* p, float* h, float* g) {
         *t = data->temperature;
         *p = data->pressure;
         *h = data->humidity;
-        *g = data->gas_resistance;
     }
 
     return (int)rslt;
