@@ -239,16 +239,6 @@ int8_t bme68x_get_regs(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, struct
     rslt = null_ptr_check(dev);
     if ((rslt == BME68X_OK) && reg_data)
     {
-        if (dev->intf == BME68X_SPI_INTF)
-        {
-            /* Set the memory page */
-            rslt = set_mem_page(reg_addr, dev);
-            if (rslt == BME68X_OK)
-            {
-                reg_addr = reg_addr | BME68X_SPI_RD_MSK;
-            }
-        }
-
         dev->intf_rslt = dev->read(reg_addr, reg_data, len, dev->intf_ptr);
         if (dev->intf_rslt != 0)
         {

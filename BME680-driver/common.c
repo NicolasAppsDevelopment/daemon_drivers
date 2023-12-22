@@ -13,7 +13,7 @@
  * Linux specific configuration. Adjust the following define to the device path
  * of your sensor.
  */
-#define I2C_DEVICE_PATH "/dev/i2c-2"
+#define I2C_DEVICE_PATH "/dev/i2c-1"
 
 /**
  * The following define was taken from i2c-dev.h. Alternatively the header file
@@ -34,6 +34,44 @@ static int i2c_device = -1;
 static uint8_t i2c_address = 0;
 
 
+int8_t bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint16_t len, void *intf_ptr)
+{
+    int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
+
+    uint8_t reg[1];
+    reg[0]=reg_addr;
+
+    if (write(i2c_device, reg, 1) != 1) {
+        printf("user_i2c_read_reg");
+        rslt = I2C_READ_FAILED;
+    }
+    if (read(i2c_device, reg_data, len) != len) {
+        printf("user_i2c_read_data");
+        rslt = I2C_READ_FAILED;
+    }
+
+    return rslt;
+}
+
+int8_t bme68x_i2c_write(uint8_t reg_addr, uint8_t *reg_data, uint16_t len, void *intf_ptr)
+{
+    int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
+
+    uint8_t reg[16];
+    reg[0]=reg_addr;
+
+    for (int i=1; i<len+1; i++)
+       reg[i] = reg_data[i-1];
+
+    if (write(i2c_device, reg, len+1) != len+1) {
+        printf("user_i2c_write");
+        rslt = I2C_READ_FAILED;
+    }
+
+    return rslt;
+}
+
+
 /**
  * Execute one read transaction on the I2C bus, reading a given number of bytes.
  * If the device does not acknowledge the read command, an error shall be
@@ -43,8 +81,8 @@ static uint8_t i2c_address = 0;
  * @param data    pointer to the buffer where the data is to be stored
  * @param count   number of bytes to read from I2C and store in the buffer
  * @returns 0 on success, error code otherwise
- */
-int8_t bme68x_i2c_read(uint8_t address, uint8_t* data, uint16_t count) {
+
+int8_t bme68x_i2c_read(uint8_t address, uint8_t* data, uint16_t count, void *intf_ptr) {
     if (i2c_address != address) {
         ioctl(i2c_device, I2C_SLAVE, address);
         i2c_address = address;
@@ -66,9 +104,8 @@ int8_t bme68x_i2c_read(uint8_t address, uint8_t* data, uint16_t count) {
  * @param data    pointer to the buffer containing the data to write
  * @param count   number of bytes to read from the buffer and send over I2C
  * @returns 0 on success, error code otherwise
- */
-int8_t bme68x_i2c_write(uint8_t address, const uint8_t* data,
-                               uint16_t count) {
+
+int8_t bme68x_i2c_write(uint8_t address, const uint8_t* data, uint16_t count, void *intf_ptr) {
     if (i2c_address != address) {
         ioctl(i2c_device, I2C_SLAVE, address);
         i2c_address = address;
@@ -78,7 +115,7 @@ int8_t bme68x_i2c_write(uint8_t address, const uint8_t* data,
         return I2C_WRITE_FAILED;
     }
     return 0;
-}
+}*/
 
 /**
  * Sleep for a given number of microseconds. The function should delay the
