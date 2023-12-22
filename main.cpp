@@ -139,7 +139,7 @@ string getSensorMeasure() {
     float pressure;
     float gas2;
 
-    error = bme680_get_measure(&temperature2, &humidity, &pressure, &gas2);
+    error = bme680_get_measure(&temperature2, &pressure, &humidity, &gas2);
     if (error) {
         return formatError("Error executing bme680_get_measure(): " + to_string(error));
     }
