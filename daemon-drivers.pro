@@ -3,6 +3,9 @@ CONFIG += console c++17
 CONFIG -= app_bundle
 CONFIG -= qt
 
+QMAKE_CXXFLAGS += -std=c++11 -pthread
+LIBS += -pthread
+
 SOURCES += \
         BME680-driver/bme68x.c \
         BME680-driver/common.c \
