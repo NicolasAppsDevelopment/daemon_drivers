@@ -20,7 +20,7 @@ void MeasureModule::BME680_measure_clock()
 
             error = bme680_get_measure(&temperature, &pressure, &humidity);
             if (error) {
-                error_array.push_front(DriverError("Impossible de récupérer les données de mesure du capteurs BME680. La fonction \"bme680_get_measure\" a retourné le code d'erreur : " + to_string(error)));
+                error_array.push_front(DriverError("Impossible de récupérer les données de mesure du capteurs BME680. La fonction [bme680_get_measure] a retourné le code d'erreur : " + to_string(error)));
                 return;
             }
 
@@ -103,14 +103,14 @@ void MeasureModule::calibrate_STC31_sensor(int pressure, int humidity)
     uint16_t hum = humidity * 65535 / 100;
     error = stc3x_set_relative_humidity(hum);
     if (error) {
-        error_array.push_front(DriverError("Impossible de calibrer le capteur STC31. La fonction \"stc3x_set_relative_humidity\" a retourné le code d'erreur : " + to_string(error)));
+        error_array.push_front(DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_relative_humidity] a retourné le code d'erreur : " + to_string(error)));
         return;
     }
 
     uint16_t pres = pressure;
     error = stc3x_set_pressure(pres);
     if (error) {
-        error_array.push_front(DriverError("Impossible de calibrer le capteur STC31. La fonction \"stc3x_set_pressure\" a retourné le code d'erreur : " + to_string(error)));
+        error_array.push_front(DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_pressure] a retourné le code d'erreur : " + to_string(error)));
         return;
     }
 }
@@ -141,7 +141,7 @@ void MeasureModule::STC31_measure_clock()
 
             error = stc3x_measure_gas_concentration(&gas_ticks, &temperature_ticks);
             if (error) {
-                error_array.push_front(DriverError("Impossible de récupérer les données de mesure du capteurs STC31. La fonction \"stc3x_measure_gas_concentration\" a retourné le code d'erreur : " + to_string(error)));
+                error_array.push_front(DriverError("Impossible de récupérer les données de mesure du capteurs STC31. La fonction [stc3x_measure_gas_concentration] a retourné le code d'erreur : " + to_string(error)));
                 return;
             }
 
@@ -173,20 +173,20 @@ void MeasureModule::reset()
     sensirion_i2c_hal_free();
     error = sensirion_i2c_hal_init();
     if (error) {
-        error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur STC31. La fonction \"sensirion_i2c_hal_init\" a retourné le code d'erreur : " + to_string(error)));
+        error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur STC31. La fonction [sensirion_i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
         return;
     }
 
     uint16_t self_test_output;
     error = stc3x_self_test(&self_test_output);
     if (error) {
-        error_array.push_front(DriverError("L'auto-test du capteur STC31 a échoué. La fonction \"stc3x_self_test\" a retourné le code d'erreur : " + to_string(error)));
+        error_array.push_front(DriverError("L'auto-test du capteur STC31 a échoué. La fonction [stc3x_self_test] a retourné le code d'erreur : " + to_string(error)));
         return;
     }
 
     error = stc3x_set_binary_gas(0x0001);
     if (error) {
-        error_array.push_front(DriverError("La défénition du mode de relève du CO2 a échoué. La fonction \"stc3x_set_binary_gas\" a retourné le code d'erreur : " + to_string(error)));
+        error_array.push_front(DriverError("La défénition du mode de relève du CO2 a échoué. La fonction [stc3x_set_binary_gas] a retourné le code d'erreur : " + to_string(error)));
         return;
     }
 
@@ -194,13 +194,13 @@ void MeasureModule::reset()
     i2c_hal_free();
     error = i2c_hal_init();
     if (error) {
-        error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur BME680. La fonction \"i2c_hal_init\" a retourné le code d'erreur : " + to_string(error)));
+        error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur BME680. La fonction [i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
         return;
     }
 
     error = bme680_self_test();
     if (error) {
-        error_array.push_front(DriverError("L'auto-test du capteur BME680 a échoué. La fonction \"bme680_self_test\" a retourné le code d'erreur : " + to_string(error)));
+        error_array.push_front(DriverError("L'auto-test du capteur BME680 a échoué. La fonction [bme680_self_test] a retourné le code d'erreur : " + to_string(error)));
         return;
     }
 

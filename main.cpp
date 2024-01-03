@@ -59,14 +59,14 @@ string calibrateSensor(string p, string rh) {
     try {
         pressure = stoi(p);
     } catch (...) {
-        return formatError("Invalid pressure argument");
+        return formatError("L'argument de la pression est invalide.");
     }
 
     int relativeHumidity = 0;
     try {
         relativeHumidity = stoi(rh);
     } catch (...) {
-        return formatError("Invalid humidity argument");
+        return formatError("L'argument de l'humidité est invalide.");
     }
 
     mm->calibrate_STC31_sensor(pressure, relativeHumidity);
@@ -80,7 +80,7 @@ string getSensorMeasure(string alt) {
     try {
         altitude = stoi(alt);
     } catch (...) {
-        return formatError("Invalid altitude argument");
+        return formatError("L'argument de l'altitude est invalide.");
     }
 
     SensorMeasure* data = mm->get(altitude);
@@ -136,13 +136,13 @@ void handleClient(int clientSocket) {
                 response = resetSensors();
             } else if (cmd == "CALIBRATE") {
                 if (args.size() != 3) {
-                    response = formatError("Missing arguments");
+                    response = formatError("Arguments manquants.");
                 } else {
                     response = calibrateSensor(args[1], args[2]);
                 }
             } else if (cmd == "MEASURE") {
                 if (args.size() != 2) {
-                    response = formatError("Missing arguments");
+                    response = formatError("Argument manquant.");
                 } else {
                     response = getSensorMeasure(args[1]);
                 }
@@ -152,7 +152,7 @@ void handleClient(int clientSocket) {
                 cout << "Client disconnected (connection closed)" << endl;
                 return;
             } else {
-                response = formatError("Unknown command");
+                response = formatError("Commande inconnue.");
             }
         }
 
