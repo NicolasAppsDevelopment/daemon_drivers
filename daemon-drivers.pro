@@ -10,7 +10,10 @@ SOURCES += \
         STC31-driver/sensirion_i2c.c \
         STC31-driver/sensirion_i2c_hal.c \
         STC31-driver/stc3x_i2c.c \
-        main.cpp
+        drivererror.cpp \
+        main.cpp \
+        measuremodule.cpp \
+        sensormeasure.cpp
 
 HEADERS += \
     BME680-driver/bme68x.h \
@@ -20,4 +23,7 @@ HEADERS += \
     STC31-driver/sensirion_config.h \
     STC31-driver/sensirion_i2c.h \
     STC31-driver/sensirion_i2c_hal.h \
-    STC31-driver/stc3x_i2c.h
+    STC31-driver/stc3x_i2c.h \
+    drivererror.h \
+    measuremodule.h \
+    sensormeasure.h
