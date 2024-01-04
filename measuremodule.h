@@ -22,6 +22,7 @@ class MeasureModule
         list<float> temperature_array, humidity_array, pressure_array, CO2_array, O2_array, luminosity_array;
         void STC31_measure_clock();
         void BME680_measure_clock();
+        void STC31_calibration_clock();
 
         list<DriverError> error_array;
         void addTemperatureSample(float);
@@ -33,11 +34,16 @@ class MeasureModule
 
         float pressureAtSeaLevel(float temperature, float pressure, float altitude);
 
+        float getAverage(list<float> array);
+
+        int altitude;
+        bool stopped;
+
     public:
         MeasureModule();
         void reset();
-        SensorMeasure* get(int altitude);
-        void calibrate_STC31_sensor(int pressure, int humidity);
+        SensorMeasure* get();
+        void setAltitude(int altitude);
         string get_errors();
 };
 

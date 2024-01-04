@@ -20,7 +20,7 @@ string formatSuccess() {
     return "{\"success\": true}\0";
 }
 string formatSendData(SensorMeasure* data) {
-    return "{\"success\": true, \"data\": {\"CO2\": " + to_string(data->CO2) + ", \"temperature\": " + to_string(data->temperature) + ", \"humidity\": " + to_string(data->humidity) + ", \"pressure\": " + to_string(data->pressure) + ", \"O2\": " + to_string(data->O2) + ", \"luminosity\": " + to_string(data->luminosity) + "}}\0";
+    return "{\"success\": true, \"data\": {\"CO2\": " + data->getCO2() + ", \"temperature\": " + data->getTemperature() + ", \"humidity\": " + data->getHumidity() + ", \"pressure\": " + data->getPressure() + ", \"O2\": " + data->getO2() + ", \"luminosity\": " + data->getLuminosity() + "}}\0";
 }
 
 vector<string> getArgs(char* buffer) {
@@ -51,31 +51,8 @@ string resetSensors() {
     return formatSuccess();
 }
 
-// Syntax : CALIBRATE <PRESSURE> <HUMIDITY>
-string calibrateSensor(string p, string rh) {
-    int16_t error = 0;
-
-    int pressure = 0;
-    try {
-        pressure = stoi(p);
-    } catch (...) {
-        return formatError("L'argument de la pression est invalide.");
-    }
-
-    int relativeHumidity = 0;
-    try {
-        relativeHumidity = stoi(rh);
-    } catch (...) {
-        return formatError("L'argument de l'humidité est invalide.");
-    }
-
-    mm->calibrate_STC31_sensor(pressure, relativeHumidity);
-
-    return formatSuccess();
-}
-
-// Syntax : MEASURE <ALTITUDE>
-string getSensorMeasure(string alt) {
+// Syntax : SET_ALTITUDE <ALTITUDE>
+string setAltitude(string alt) {
     int altitude = 0;
     try {
         altitude = stoi(alt);
@@ -83,19 +60,31 @@ string getSensorMeasure(string alt) {
         return formatError("L'argument de l'altitude est invalide.");
     }
 
-    SensorMeasure* data = mm->get(altitude);
+    mm->setAltitude(altitude);
+
+    return formatSuccess();
+}
+
+// Syntax : GET_ERRORS
+string getErrors() {
+    return mm->get_errors();
+}
+
+// Syntax : GET_MEASURE
+string getSensorMeasure() {
+    SensorMeasure* data = mm->get();
     if (data == nullptr) {
-        return mm->get_errors();
+        return formatError("Le dispositif de mesure a été intérrompu probablement à la suite d'une erreur. Pour plus d'information, consultez les erreurs avec GET_ERRORS puis tentez de le réinitialiser avec RESET.");
     }
 
     string res = formatSendData(data);
     cout << "--------------------" << endl;
-    cout << " CO2: " << data->CO2 << "%/vol" << endl;
-    cout << " TEMP: " << data->temperature << "°C" << endl;
-    cout << " HUMID: " << data->humidity << "%" << endl;
-    cout << " PRESS: " << data->pressure << "Pa" << endl;
-    cout << " O2: " << data->O2 << endl;
-    cout << " LUM: " << data->luminosity << "" << endl;
+    cout << " CO2: " << data->getCO2() << "%/vol" << endl;
+    cout << " TEMP: " << data->getTemperature() << "°C" << endl;
+    cout << " HUMID: " << data->getHumidity() << "%" << endl;
+    cout << " PRESS: " << data->getPressure() << "Pa" << endl;
+    cout << " O2: " << data->getO2() << endl;
+    cout << " LUM: " << data->getLuminosity() << "" << endl;
 
     delete data;
     return res;
@@ -134,18 +123,16 @@ void handleClient(int clientSocket) {
 
             if (cmd == "RESET") {
                 response = resetSensors();
-            } else if (cmd == "CALIBRATE") {
-                if (args.size() != 3) {
-                    response = formatError("Arguments manquants.");
-                } else {
-                    response = calibrateSensor(args[1], args[2]);
-                }
-            } else if (cmd == "MEASURE") {
+            } else if (cmd == "SET_ALTITUDE") {
                 if (args.size() != 2) {
                     response = formatError("Argument manquant.");
                 } else {
-                    response = getSensorMeasure(args[1]);
+                    response = setAltitude(args[1]);
                 }
+            } else if (cmd == "GET_MEASURE") {
+                response = getSensorMeasure();
+            } else if (cmd == "GET_ERRORS") {
+                response = getErrors();
             } else if (cmd == "CLOSE") {
                 // Close the client socket
                 close(clientSocket);

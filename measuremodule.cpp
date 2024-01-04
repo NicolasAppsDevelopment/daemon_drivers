@@ -11,28 +11,127 @@ using namespace std;
 void MeasureModule::BME680_measure_clock()
 {
     while (true) {
-        try {
-            int16_t error = 0;
+        if (!stopped) {
+            try {
+                int16_t error = 0;
 
-            float temperature;
-            float humidity;
-            float pressure;
+                float temperature;
+                float humidity;
+                float pressure;
 
-            error = bme680_get_measure(&temperature, &pressure, &humidity);
-            if (error) {
-                error_array.push_front(DriverError("Impossible de récupérer les données de mesure du capteurs BME680. La fonction [bme680_get_measure] a retourné le code d'erreur : " + to_string(error)));
-                return;
+                error = bme680_get_measure(&temperature, &pressure, &humidity);
+                if (error) {
+                    throw DriverError("Impossible de récupérer les données de mesure du capteurs BME680. La fonction [bme680_get_measure] a retourné le code d'erreur : " + to_string(error));
+                }
+
+                addHumiditySample(humidity);
+                addPressureSample(pressure);
+                addTemperatureSample(temperature);
+            } catch (const DriverError& e) {
+                error_array.push_front(e);
+                this->stopped = true;
+            } catch (...) {
+                error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur BME680."));
+                this->stopped = true;
             }
-
-            addHumiditySample(humidity);
-            addPressureSample(pressure);
-            addTemperatureSample(temperature);
-
-            sleep(1);
-        } catch (...) {
-            error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur BME680."));
-            return;
         }
+
+        sleep(1);
+    }
+}
+
+void MeasureModule::STC31_measure_clock()
+{
+    while (true) {
+        if (!stopped) {
+            try {
+                int16_t error = 0;
+
+                uint16_t gas_ticks;
+                uint16_t temperature_ticks;
+
+                float gas;
+                float temperature;
+
+                error = stc3x_measure_gas_concentration(&gas_ticks, &temperature_ticks);
+                if (error) {
+                    throw DriverError("Impossible de récupérer les données de mesure du capteurs STC31. La fonction [stc3x_measure_gas_concentration] a retourné le code d'erreur : " + to_string(error));
+                }
+
+                gas = 100 * ((float)gas_ticks - 16384.0) / 32768.0;
+                temperature = (float)temperature_ticks / 200.0;
+
+                addCO2Sample(gas);
+                addTemperatureSample(temperature);
+            } catch (const DriverError& e) {
+                error_array.push_front(e);
+                this->stopped = true;
+            } catch (...) {
+                error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur STC31."));
+                this->stopped = true;
+            }
+        }
+
+        sleep(1);
+    }
+}
+
+void MeasureModule::STC31_calibration_clock()
+{
+    while (true) {
+        if (!stopped) {
+            try {
+                float temperature = __FLT_MIN__;
+                try {
+                    temperature = getAverage(temperature_array);
+                } catch (const DriverError& e) {
+                    perror("WARN: Impossible de calibrer le capteur STC31. Série pas assez remplie concernée : température.");
+                }
+
+                float humidity = __FLT_MIN__;
+                try {
+                    humidity = getAverage(humidity_array);
+                } catch (const DriverError& e) {
+                    perror("WARN: Impossible de calibrer le capteur STC31. Série pas assez remplie concernée : humidité.");
+                }
+
+                float pressure = __FLT_MIN__;
+                try {
+                    pressure = getAverage(pressure_array);
+
+                    if (temperature != __FLT_MIN__ && pressure != __FLT_MIN__) {
+                        // convert to pressure at altitude to pressure at sea level
+                        pressure = pressureAtSeaLevel(temperature, pressure, this->altitude);
+                    }
+                } catch (const DriverError& e) {
+                    perror("WARN: Impossible de calibrer le capteur STC31. Série pas assez remplie concernée : pression.");
+                }
+
+                if (temperature != __FLT_MIN__ && pressure != __FLT_MIN__ && humidity != __FLT_MIN__) {
+                    int16_t error = 0;
+
+                    uint16_t hum = humidity * 65535 / 100;
+                    error = stc3x_set_relative_humidity(hum);
+                    if (error) {
+                        throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_relative_humidity] a retourné le code d'erreur : " + to_string(error));
+                    }
+
+                    uint16_t pres = pressure;
+                    error = stc3x_set_pressure(pres);
+                    if (error) {
+                        throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_pressure] a retourné le code d'erreur : " + to_string(error));
+                    }
+                }
+            } catch (const DriverError& e) {
+                error_array.push_front(e);
+                this->stopped = true;
+            } catch (...) {
+                error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de calibration du capteur STC31."));
+                this->stopped = true;
+            }
+        }
+
+        sleep(2);
     }
 }
 
@@ -96,23 +195,32 @@ float MeasureModule::pressureAtSeaLevel(float temperature, float pressure, float
     return pressure * exp((gravitational_acceleration * altitude) / (287.058 * temperature_at_altitude));
 }
 
-void MeasureModule::calibrate_STC31_sensor(int pressure, int humidity)
+
+
+float MeasureModule::getAverage(list<float> array)
 {
-    int16_t error = 0;
-
-    uint16_t hum = humidity * 65535 / 100;
-    error = stc3x_set_relative_humidity(hum);
-    if (error) {
-        error_array.push_front(DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_relative_humidity] a retourné le code d'erreur : " + to_string(error)));
-        return;
+    // remove higher & lower value, then process the average
+    if (array.size() < NB_OF_SAMPLE) {
+        throw DriverError("Le module de relève n'a pas encore assez de données pour réaliser une moyenne précise de cette série.");
     }
 
-    uint16_t pres = pressure;
-    error = stc3x_set_pressure(pres);
-    if (error) {
-        error_array.push_front(DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_pressure] a retourné le code d'erreur : " + to_string(error)));
-        return;
+    float avg = 0;
+    float max = __FLT_MIN__;
+    float min = __FLT_MAX__;
+    for (auto const& val : array) {
+        if (val > max) {
+            max = val;
+        }
+        if (val < min) {
+            min = val;
+        }
+        avg += val;
     }
+    avg -= max;
+    avg -= min;
+    avg /= array.size() - 2;
+
+    return avg;
 }
 
 string MeasureModule::get_errors()
@@ -127,46 +235,34 @@ string MeasureModule::get_errors()
     return res;
 }
 
-void MeasureModule::STC31_measure_clock()
-{
-    while (true) {
-        try {
-            int16_t error = 0;
 
-            uint16_t gas_ticks;
-            uint16_t temperature_ticks;
-
-            float gas;
-            float temperature;
-
-            error = stc3x_measure_gas_concentration(&gas_ticks, &temperature_ticks);
-            if (error) {
-                error_array.push_front(DriverError("Impossible de récupérer les données de mesure du capteurs STC31. La fonction [stc3x_measure_gas_concentration] a retourné le code d'erreur : " + to_string(error)));
-                return;
-            }
-
-            gas = 100 * ((float)gas_ticks - 16384.0) / 32768.0;
-            temperature = (float)temperature_ticks / 200.0;
-
-            addCO2Sample(gas);
-            addTemperatureSample(temperature);
-
-            sleep(1);
-        } catch (...) {
-            error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur STC31."));
-            return;
-        }
-    }
-}
 
 MeasureModule::MeasureModule()
 {
+    this->stopped = true;
     reset();
+
+    thread t(&MeasureModule::STC31_measure_clock, this);
+    t.detach();
+
+    thread t2(&MeasureModule::BME680_measure_clock, this);
+    t2.detach();
+
+    thread t3(&MeasureModule::STC31_calibration_clock, this);
+    t3.detach();
 }
 
 void MeasureModule::reset()
 {
+    this->altitude = 0;
     this->error_array.clear();
+    this->temperature_array.clear();
+    this->humidity_array.clear();
+    this->luminosity_array.clear();
+    this->CO2_array.clear();
+    this->O2_array.clear();
+    this->pressure_array.clear();
+
     int16_t error = 0;
 
     /* STC31 init */
@@ -204,149 +300,70 @@ void MeasureModule::reset()
         return;
     }
 
-    thread t(&MeasureModule::STC31_measure_clock, this);
-    t.detach();
-
-    thread t2(&MeasureModule::BME680_measure_clock, this);
-    t2.detach();
+    this->stopped = false;
 }
 
-SensorMeasure* MeasureModule::get(int altitude)
+SensorMeasure* MeasureModule::get()
 {
-    // remove higher & lower value, then process the average for temperature
-    if (temperature_array.size() < NB_OF_SAMPLE) {
-        error_array.push_front(DriverError("Le module de relève n'a pas encore assez de données pour réaliser une moyenne précise de la température."));
+    if (stopped) {
         return nullptr;
     }
 
-    float temperature = 0;
-    float temperature_max = __FLT_MIN__;
-    float temperature_min = __FLT_MAX__;
-    for (auto const& t : temperature_array) {
-        if (t > temperature_max) {
-            temperature_max = t;
-        }
-        if (t < temperature_min) {
-            temperature_min = t;
-        }
-        temperature += t;
-    }
-    temperature -= temperature_max;
-    temperature -= temperature_min;
-    temperature /= temperature_array.size() - 2;
-
-    // remove higher & lower value, then process the average for humidity
-    if (humidity_array.size() < NB_OF_SAMPLE) {
-        error_array.push_front(DriverError("Le module de relève n'a pas encore assez de données pour réaliser une moyenne précise de l'humidité."));
-        return nullptr;
+    float temperature = __FLT_MIN__;
+    try {
+        temperature = getAverage(temperature_array);
+    } catch (const DriverError& e) {
+        string err_msg = e.message + " Série concernée : température.";
+        error_array.push_front(DriverError(err_msg));
     }
 
-    float humidity = 0;
-    float humidity_max = __FLT_MIN__;
-    float humidity_min = __FLT_MAX__;
-    for (auto const& h : humidity_array) {
-        if (h > humidity_max) {
-            humidity_max = h;
-        }
-        if (h < humidity_min) {
-            humidity_min = h;
-        }
-        humidity += h;
-    }
-    humidity -= humidity_max;
-    humidity -= humidity_min;
-    humidity /= humidity_array.size() - 2;
-
-    // remove higher & lower value, then process the average for pressure
-    if (pressure_array.size() < NB_OF_SAMPLE) {
-        error_array.push_front(DriverError("Le module de relève n'a pas encore assez de données pour réaliser une moyenne précise de la pression."));
-        return nullptr;
+    float humidity = __FLT_MIN__;
+    try {
+        humidity = getAverage(humidity_array);
+    } catch (const DriverError& e) {
+        string err_msg = e.message + " Série concernée : humidité.";
+        error_array.push_front(DriverError(err_msg));
     }
 
-    float pressure = 0;
-    float pressure_max = __FLT_MIN__;
-    float pressure_min = __FLT_MAX__;
-    for (auto const& p : pressure_array) {
-        if (p > pressure_max) {
-            pressure_max = p;
-        }
-        if (p < pressure_min) {
-            pressure_min = p;
-        }
-        pressure += p;
-    }
-    pressure -= pressure_max;
-    pressure -= pressure_min;
-    pressure /= pressure_array.size() - 2;
+    float pressure = __FLT_MIN__;
+    try {
+        pressure = getAverage(pressure_array);
 
-    // convert to pressure at altitude to pressure at sea level
-    pressure = exp((-9.80665 * 0.0289644 * altitude) / (8.31432 * (273.15 + temperature))) / pressure;
-
-    // remove higher & lower value, then process the average for CO2
-    if (CO2_array.size() < NB_OF_SAMPLE) {
-        error_array.push_front(DriverError("Le module de relève n'a pas encore assez de données pour réaliser une moyenne précise du CO2."));
-        return nullptr;
+        // convert to pressure at altitude to pressure at sea level
+        pressure = pressureAtSeaLevel(temperature, pressure, this->altitude);
+    } catch (const DriverError& e) {
+        string err_msg = e.message + " Série concernée : pression.";
+        error_array.push_front(DriverError(err_msg));
     }
 
-    float CO2 = 0;
-    float CO2_max = __FLT_MIN__;
-    float CO2_min = __FLT_MAX__;
-    for (auto const& co2 : CO2_array) {
-        if (co2 > CO2_max) {
-            CO2_max = co2;
-        }
-        if (co2 < CO2_min) {
-            CO2_min = co2;
-        }
-        CO2 += co2;
-    }
-    CO2 -= CO2_max;
-    CO2 -= CO2_min;
-    CO2 /= CO2_array.size() - 2;
-
-    // remove higher & lower value, then process the average for O2
-    if (O2_array.size() < NB_OF_SAMPLE) {
-        error_array.push_front(DriverError("Le module de relève n'a pas encore assez de données pour réaliser une moyenne précise du O2."));
-        return nullptr;
+    float CO2 = __FLT_MIN__;
+    try {
+        CO2 = getAverage(CO2_array);
+    } catch (const DriverError& e) {
+        string err_msg = e.message + " Série concernée : CO2.";
+        error_array.push_front(DriverError(err_msg));
     }
 
-    float O2 = 0;
-    float O2_max = __FLT_MIN__;
-    float O2_min = __FLT_MAX__;
-    for (auto const& o2 : O2_array) {
-        if (o2 > O2_max) {
-            O2_max = o2;
-        }
-        if (o2 < O2_min) {
-            O2_min = o2;
-        }
-        O2 += o2;
-    }
-    O2 -= O2_max;
-    O2 -= O2_min;
-    O2 /= O2_array.size() - 2;
-
-    // remove higher & lower value, then process the average for luminosity
-    if (luminosity_array.size() < NB_OF_SAMPLE) {
-        error_array.push_front(DriverError("Le module de relève n'a pas encore assez de données pour réaliser une moyenne précise de la luminosité."));
-        return nullptr;
+    float O2 = __FLT_MIN__;
+    try {
+        O2 = getAverage(O2_array);
+    } catch (const DriverError& e) {
+        string err_msg = e.message + " Série concernée : O2.";
+        error_array.push_front(DriverError(err_msg));
     }
 
-    float luminosity = 0;
-    float luminosity_max = __FLT_MIN__;
-    float luminosity_min = __FLT_MAX__;
-    for (auto const& l : luminosity_array) {
-        if (l > luminosity_max) {
-            luminosity_max = l;
-        }
-        if (l < luminosity_min) {
-            luminosity_min = l;
-        }
-        luminosity += l;
+    float luminosity = __FLT_MIN__;
+    try {
+        luminosity = getAverage(luminosity_array);
+    } catch (const DriverError& e) {
+        string err_msg = e.message + " Série concernée : luminosité.";
+        error_array.push_front(DriverError(err_msg));
     }
-    luminosity -= luminosity_max;
-    luminosity -= luminosity_min;
-    luminosity /= luminosity_array.size() - 2;
 
     return new SensorMeasure(temperature, humidity, pressure, CO2, O2, luminosity);
+}
+
+void MeasureModule::setAltitude(int altitude)
+{
+    this->altitude = altitude;
 }
