@@ -38,6 +38,7 @@ class MeasureModule
 
         int altitude;
         bool stopped;
+        bool STC31_calibrating;
 
     public:
         MeasureModule();

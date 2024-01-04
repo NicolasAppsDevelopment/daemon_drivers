@@ -81,7 +81,7 @@ void MeasureModule::STC31_measure_clock()
 void MeasureModule::STC31_calibration_clock()
 {
     while (true) {
-        if (!stopped) {
+        if (!stopped && !this->STC31_calibrating) {
             try {
                 float temperature = __FLT_MIN__;
                 try {
@@ -111,6 +111,7 @@ void MeasureModule::STC31_calibration_clock()
 
                 if (temperature != __FLT_MIN__ && pressure != __FLT_MIN__ && humidity != __FLT_MIN__) {
                     int16_t error = 0;
+                    this->STC31_calibrating = true;
 
                     uint16_t hum = humidity * 65535 / 100;
                     error = stc3x_set_relative_humidity(hum);
@@ -123,6 +124,7 @@ void MeasureModule::STC31_calibration_clock()
                     if (error) {
                         throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_pressure] a retourné le code d'erreur : " + to_string(error));
                     }
+
                 }
             } catch (const DriverError& e) {
                 error_array.push_front(e);
@@ -133,7 +135,8 @@ void MeasureModule::STC31_calibration_clock()
             }
         }
 
-        sleep(2);
+        this->STC31_calibrating = false;
+        sleep(5);
     }
 }
 
@@ -257,6 +260,7 @@ MeasureModule::MeasureModule()
 void MeasureModule::reset()
 {
     this->altitude = 0;
+    this->STC31_calibrating = false;
     this->error_array.clear();
     this->temperature_array.clear();
     this->humidity_array.clear();
