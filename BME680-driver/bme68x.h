@@ -317,6 +317,7 @@ int8_t bme68x_get_heatr_conf(const struct bme68x_heatr_conf *conf, struct bme68x
  */
 int8_t bme68x_selftest_check(const struct bme68x_dev *dev);
 
+
 #ifdef __cplusplus
 }
 #endif /* End of CPP guard */

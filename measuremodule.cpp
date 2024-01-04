@@ -21,12 +21,14 @@ void MeasureModule::BME680_measure_clock()
 
                 error = bme680_get_measure(&temperature, &pressure, &humidity);
                 if (error) {
-                    throw DriverError("Impossible de récupérer les données de mesure du capteurs BME680. La fonction [bme680_get_measure] a retourné le code d'erreur : " + to_string(error));
+                    if (error != 2) { // DO NOT THROW ERROR IF IT'S A NO NEW DATA ERROR
+                        throw DriverError("Impossible de récupérer les données de mesure du capteurs BME680. La fonction [bme680_get_measure] a retourné le code d'erreur : " + to_string(error));
+                    }
+                } else {
+                    addHumiditySample(humidity);
+                    addPressureSample(pressure);
+                    addTemperatureSample(temperature);
                 }
-
-                addHumiditySample(humidity);
-                addPressureSample(pressure);
-                addTemperatureSample(temperature);
             } catch (const DriverError& e) {
                 error_array.push_front(e);
                 this->stopped = true;
