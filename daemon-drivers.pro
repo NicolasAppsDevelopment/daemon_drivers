@@ -29,4 +29,5 @@ HEADERS += \
     STC31-driver/stc3x_i2c.h \
     drivererror.h \
     measuremodule.h \
+    sema.h \
     sensormeasure.h
