@@ -27,16 +27,11 @@
 #define SHTC1_CMD_MEASURE_LPM 0x609C
 #endif /* USE_SENSIRION_CLOCK_STRETCHING */
 
-#ifdef SHT_ADDRESS
-#define SHTC1_ADDRESS SHT_ADDRESS
-#else
-#define SHTC1_ADDRESS 0x70
-#endif
-
 #define SHTC1_CMD_DURATION_USEC 1000
 
 #define SHTC3_CMD_SLEEP 0xB098
 #define SHTC3_CMD_WAKEUP 0x3517
+#define SHTC1_ADDRESS 0x70
 
 class SHTC3Driver : public SensirionDriver {
 public:

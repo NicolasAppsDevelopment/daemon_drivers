@@ -11,6 +11,9 @@
 
 #include "shtc3.h"
 #include "Sensirion-driver-base/sensirion_common.h"
+#include <iostream>
+
+using namespace std;
 
 int16_t SHTC3Driver::shtc1_sleep(void) {
     return sensirion_i2c_write_cmd(SHTC1_ADDRESS, SHTC3_CMD_SLEEP);
@@ -72,6 +75,7 @@ int16_t SHTC3Driver::shtc1_read_serial(uint32_t* serial) {
     ret = sensirion_i2c_write_cmd_with_args(SHTC1_ADDRESS, 0xC595, tx_words,
                                             SENSIRION_NUM_WORDS(tx_words));
     if (ret)
+        printf("err sensirion_i2c_write_cmd_with_args");
         return ret;
 
     sensirion_i2c_hal_sleep_usec(SHTC1_CMD_DURATION_USEC);
@@ -79,11 +83,13 @@ int16_t SHTC3Driver::shtc1_read_serial(uint32_t* serial) {
     ret = sensirion_i2c_delayed_read_cmd(
         SHTC1_ADDRESS, 0xC7F7, SHTC1_CMD_DURATION_USEC, &serial_words[0], 1);
     if (ret)
+        printf("err sensirion_i2c_delayed_read_cmd");
         return ret;
 
     ret = sensirion_i2c_delayed_read_cmd(
         SHTC1_ADDRESS, 0xC7F7, SHTC1_CMD_DURATION_USEC, &serial_words[1], 1);
     if (ret)
+        printf("err sensirion_i2c_delayed_read_cmd 2");
         return ret;
 
     *serial = ((uint32_t)serial_words[0] << 16) | serial_words[1];
