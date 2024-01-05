@@ -57,8 +57,12 @@ int16_t SHTC3Driver::shtc1_read(int32_t* temperature, int32_t* humidity) {
 
 int16_t SHTC3Driver::shtc1_probe(void) {
     uint32_t serial;
+    int16_t ret;
 
-    (void)shtc1_wake_up(); /* Try to wake up the sensor, ignore return value */
+    ret = shtc1_wake_up(); /* Try to wake up the sensor */
+    if (ret) {
+        return ret;
+    }
     return shtc1_read_serial(&serial);
 }
 
