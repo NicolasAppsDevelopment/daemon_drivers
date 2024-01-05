@@ -5,7 +5,7 @@
 #include <thread>
 #include <drivererror.h>
 #include <sensormeasure.h>
-#include <sema.h>
+#include <mutex>
 using namespace std;
 
 #define NB_TEMPERATURE_SENSOR 3
@@ -39,7 +39,7 @@ class MeasureModule
 
         int altitude;
         bool stopped;
-        CSemaphore STC31_calibrating;
+        mutex STC31_calibrating;
 
     public:
         MeasureModule();

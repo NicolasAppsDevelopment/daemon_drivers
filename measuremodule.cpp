@@ -55,9 +55,9 @@ void MeasureModule::STC31_measure_clock()
                 float gas;
                 float temperature;
 
-                this->STC31_calibrating.wait();
+                this->STC31_calibrating.lock();
                 error = stc3x_measure_gas_concentration(&gas_ticks, &temperature_ticks);
-                this->STC31_calibrating.notify();
+                this->STC31_calibrating.unlock();
 
                 if (error) {
                     throw DriverError("Impossible de récupérer les données de mesure du capteurs STC31. La fonction [stc3x_measure_gas_concentration] a retourné le code d'erreur : " + to_string(error));
@@ -117,9 +117,9 @@ void MeasureModule::STC31_calibration_clock()
 
                     uint16_t hum = humidity * 65535 / 100;
 
-                    this->STC31_calibrating.wait();
+                    this->STC31_calibrating.lock();
                     error = stc3x_set_relative_humidity(hum);
-                    this->STC31_calibrating.notify();
+                    this->STC31_calibrating.unlock();
 
                     if (error) {
                         throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_relative_humidity] a retourné le code d'erreur : " + to_string(error));
@@ -127,9 +127,9 @@ void MeasureModule::STC31_calibration_clock()
 
                     uint16_t pres = pressure;
 
-                    this->STC31_calibrating.wait();
+                    this->STC31_calibrating.lock();
                     error = stc3x_set_pressure(pres);
-                    this->STC31_calibrating.notify();
+                    this->STC31_calibrating.unlock();
 
                     if (error) {
                         throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_pressure] a retourné le code d'erreur : " + to_string(error));
@@ -145,7 +145,6 @@ void MeasureModule::STC31_calibration_clock()
             }
         }
 
-        this->STC31_calibrating = false;
         sleep(5);
     }
 }
@@ -269,8 +268,8 @@ MeasureModule::MeasureModule()
 
 void MeasureModule::reset()
 {
+    this->STC31_calibrating.unlock();
     this->altitude = 0;
-    this->STC31_calibrating = CSemaphore(1);
     this->error_array.clear();
     this->temperature_array.clear();
     this->humidity_array.clear();
