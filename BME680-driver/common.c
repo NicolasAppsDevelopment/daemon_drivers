@@ -237,11 +237,11 @@ int bme680_get_measure(float* t, float* p, float* h) {
     bme68x_check_rslt("bme68x_get_data", rslt);
 
     if (n_fields) {
-        printf("Data received, status : 0x%x\n", data->status);
-
         *t = data->temperature;
         *p = data->pressure;
         *h = data->humidity;
+
+        printf("Data received : %f °C, %f Pa, %f %\n", data->temperature, data->pressure, data->humidity);
     }
 
     return (int)rslt;

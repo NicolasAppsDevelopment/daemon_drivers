@@ -66,6 +66,8 @@ void MeasureModule::STC31_measure_clock()
                 gas = 100 * ((float)gas_ticks - 16384.0) / 32768.0;
                 temperature = (float)temperature_ticks / 200.0;
 
+                printf("Data received : %f °C, %f %vol\n", temperature, gas);
+
                 addCO2Sample(gas);
                 addTemperatureSample(temperature);
             } catch (const DriverError& e) {
@@ -134,6 +136,8 @@ void MeasureModule::STC31_calibration_clock()
                     if (error) {
                         throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_pressure] a retourné le code d'erreur : " + to_string(error));
                     }
+
+                    printf("STC31 calibrated with data : %f °C, %f Pa, %f %, %f m\n", temperature, pressure, humidity, this->altitude);
 
                 }
             } catch (const DriverError& e) {
