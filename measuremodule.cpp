@@ -358,6 +358,12 @@ void MeasureModule::reset()
         return;
     }
 
+    while (SHTC3_driver.shtc1_probe() != STATUS_OK) {
+        printf("SHTC3 sensor probing failed\n");
+        sleep(1);
+    }
+    printf("SHTC3 sensor probing successful\n");
+
     /* BME680 init */
     i2c_hal_free();
     error = i2c_hal_init();
