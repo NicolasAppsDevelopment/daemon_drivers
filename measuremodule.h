@@ -6,6 +6,9 @@
 #include <drivererror.h>
 #include <sensormeasure.h>
 #include <mutex>
+
+#include "STC31-driver/stc31.h"
+#include "SHTC3-driver/shtc3.h"
 using namespace std;
 
 #define NB_TEMPERATURE_SENSOR 3
@@ -22,6 +25,7 @@ class MeasureModule
     private:
         list<float> temperature_array, humidity_array, pressure_array, CO2_array, O2_array, luminosity_array;
         void STC31_measure_clock();
+        void SHTC3_measure_clock();
         void BME680_measure_clock();
         void STC31_calibration_clock();
 
@@ -40,6 +44,9 @@ class MeasureModule
         int altitude;
         bool stopped;
         mutex STC31_calibrating;
+
+        STC31Driver STC31_driver;
+        SHTC3Driver SHTC3_driver;
 
     public:
         MeasureModule();

@@ -9,10 +9,10 @@ LIBS += -pthread
 SOURCES += \
         BME680-driver/bme68x.c \
         BME680-driver/common.c \
-        STC31-driver/sensirion_common.c \
-        STC31-driver/sensirion_i2c.c \
-        STC31-driver/sensirion_i2c_hal.c \
-        STC31-driver/stc3x_i2c.c \
+        SHTC3-driver/shtc3.cpp \
+        STC31-driver/stc31.cpp \
+        Sensirion-driver-base/sensirion_common.c \
+        Sensirion-driver-base/sensirion_driver.cpp \
         drivererror.cpp \
         main.cpp \
         measuremodule.cpp \
@@ -22,11 +22,11 @@ HEADERS += \
     BME680-driver/bme68x.h \
     BME680-driver/bme68x_defs.h \
     BME680-driver/common.h \
-    STC31-driver/sensirion_common.h \
-    STC31-driver/sensirion_config.h \
-    STC31-driver/sensirion_i2c.h \
-    STC31-driver/sensirion_i2c_hal.h \
-    STC31-driver/stc3x_i2c.h \
+    SHTC3-driver/shtc3.h \
+    STC31-driver/stc31.h \
+    Sensirion-driver-base/sensirion_common.h \
+    Sensirion-driver-base/sensirion_config.h \
+    Sensirion-driver-base/sensirion_driver.h \
     drivererror.h \
     measuremodule.h \
     sensormeasure.h

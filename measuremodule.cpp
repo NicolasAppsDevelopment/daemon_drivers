@@ -1,8 +1,7 @@
 #include "measuremodule.h"
-#include "STC31-driver/sensirion_common.h"
-#include "STC31-driver/sensirion_i2c_hal.h"
-#include "STC31-driver/stc3x_i2c.h"
+#include "STC31-driver/stc31.h"
 #include "BME680-driver/common.h"
+#include "SHTC3-driver/shtc3.h"
 #include <unistd.h>
 #include <math.h>
 
@@ -42,6 +41,46 @@ void MeasureModule::BME680_measure_clock()
     }
 }
 
+void MeasureModule::SHTC3_measure_clock()
+{
+    while (true) {
+        if (!stopped) {
+            try {
+                int8_t error = 0;
+
+                int32_t temp, humid;
+
+                float humidity;
+                float temperature;
+
+                //this->SHTC3_calibrating.lock();
+                error = SHTC3_driver.shtc1_measure_blocking_read(&temp, &humid);
+                //this->SHTC3_calibrating.unlock();
+
+                if (error) {
+                    throw DriverError("Impossible de récupérer les données de mesure du capteurs SHTC3. La fonction [shtc1_measure_blocking_read] a retourné le code d'erreur : " + to_string(error));
+                }
+
+                humidity = (float)humid / 1000.0;
+                temperature = (float)temp / 1000.0;
+
+                printf("Data received from SHTC3: %f °C, %f %\n", temperature, humidity);
+
+                addHumiditySample(humidity);
+                addTemperatureSample(temperature);
+            } catch (const DriverError& e) {
+                error_array.push_front(e);
+                this->stopped = true;
+            } catch (...) {
+                error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur SHTC3."));
+                this->stopped = true;
+            }
+        }
+
+        sleep(1);
+    }
+}
+
 void MeasureModule::STC31_measure_clock()
 {
     while (true) {
@@ -56,7 +95,7 @@ void MeasureModule::STC31_measure_clock()
                 float temperature;
 
                 this->STC31_calibrating.lock();
-                error = stc3x_measure_gas_concentration(&gas_ticks, &temperature_ticks);
+                error = STC31_driver.stc3x_measure_gas_concentration(&gas_ticks, &temperature_ticks);
                 this->STC31_calibrating.unlock();
 
                 if (error) {
@@ -66,7 +105,7 @@ void MeasureModule::STC31_measure_clock()
                 gas = 100 * ((float)gas_ticks - 16384.0) / 32768.0;
                 temperature = (float)temperature_ticks / 200.0;
 
-                printf("Data received : %f °C, %f %vol\n", temperature, gas);
+                printf("Data received from STC31: %f °C, %f %vol\n", temperature, gas);
 
                 addCO2Sample(gas);
                 addTemperatureSample(temperature);
@@ -120,7 +159,7 @@ void MeasureModule::STC31_calibration_clock()
                     uint16_t hum = humidity * 65535 / 100;
 
                     this->STC31_calibrating.lock();
-                    error = stc3x_set_relative_humidity(hum);
+                    error = STC31_driver.stc3x_set_relative_humidity(hum);
                     this->STC31_calibrating.unlock();
 
                     if (error) {
@@ -130,14 +169,14 @@ void MeasureModule::STC31_calibration_clock()
                     uint16_t pres = pressure;
 
                     this->STC31_calibrating.lock();
-                    error = stc3x_set_pressure(pres);
+                    error = STC31_driver.stc3x_set_pressure(pres);
                     this->STC31_calibrating.unlock();
 
                     if (error) {
                         throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_pressure] a retourné le code d'erreur : " + to_string(error));
                     }
 
-                    printf("STC31 calibrated with data : %f °C, %f Pa, %f %, %f m\n", temperature, pressure, humidity, this->altitude);
+                    printf("STC31 calibrated with data : %f °C, %f Pa, %f %, %d m\n", temperature, pressure, humidity, this->altitude);
 
                 }
             } catch (const DriverError& e) {
@@ -257,17 +296,23 @@ string MeasureModule::get_errors()
 
 MeasureModule::MeasureModule()
 {
+    this->STC31_driver = STC31Driver();
+    this->SHTC3_driver = SHTC3Driver();
+
     this->stopped = true;
     reset();
 
     thread t(&MeasureModule::STC31_measure_clock, this);
     t.detach();
 
-    thread t2(&MeasureModule::BME680_measure_clock, this);
+    thread t2(&MeasureModule::SHTC3_measure_clock, this);
     t2.detach();
 
-    thread t3(&MeasureModule::STC31_calibration_clock, this);
+    thread t3(&MeasureModule::BME680_measure_clock, this);
     t3.detach();
+
+    thread t4(&MeasureModule::STC31_calibration_clock, this);
+    t4.detach();
 }
 
 void MeasureModule::reset()
@@ -285,23 +330,31 @@ void MeasureModule::reset()
     int16_t error = 0;
 
     /* STC31 init */
-    sensirion_i2c_hal_free();
-    error = sensirion_i2c_hal_init();
+    STC31_driver.sensirion_i2c_hal_free();
+    error = STC31_driver.sensirion_i2c_hal_init();
     if (error) {
         error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur STC31. La fonction [sensirion_i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
         return;
     }
 
     uint16_t self_test_output;
-    error = stc3x_self_test(&self_test_output);
+    error = STC31_driver.stc3x_self_test(&self_test_output);
     if (error) {
         error_array.push_front(DriverError("L'auto-test du capteur STC31 a échoué. La fonction [stc3x_self_test] a retourné le code d'erreur : " + to_string(error)));
         return;
     }
 
-    error = stc3x_set_binary_gas(0x0001);
+    error = STC31_driver.stc3x_set_binary_gas(0x0001);
     if (error) {
         error_array.push_front(DriverError("La défénition du mode de relève du CO2 a échoué. La fonction [stc3x_set_binary_gas] a retourné le code d'erreur : " + to_string(error)));
+        return;
+    }
+
+    /* SHTC3 init */
+    SHTC3_driver.sensirion_i2c_hal_free();
+    error = SHTC3_driver.sensirion_i2c_hal_init();
+    if (error) {
+        error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur SHTC3. La fonction [sensirion_i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
         return;
     }
 

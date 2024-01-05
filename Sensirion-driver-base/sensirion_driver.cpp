@@ -1,40 +1,103 @@
-/*
- * Copyright (c) 2018, Sensirion AG
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- *
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- *
- * * Neither the name of Sensirion AG nor the names of its
- *   contributors may be used to endorse or promote products derived from
- *   this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
-
-#include "sensirion_i2c.h"
+#include "sensirion_driver.h"
 #include "sensirion_common.h"
 #include "sensirion_config.h"
-#include "sensirion_i2c_hal.h"
 
-uint8_t sensirion_i2c_generate_crc(const uint8_t* data, uint16_t count) {
+#include <fcntl.h>
+#include <stdio.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+
+/**
+ * Initialize all hard- and software components that are needed for the I2C
+ * communication.
+ */
+int16_t SensirionDriver::sensirion_i2c_hal_init(void) {
+    /* open i2c adapter */
+    i2c_device = open(I2C_DEVICE_PATH, O_RDWR);
+    if (i2c_device == -1) {
+        return -1;
+    }
+    return 0;
+}
+
+/**
+ * Release all resources initialized by sensirion_i2c_hal_init().
+ */
+void SensirionDriver::sensirion_i2c_hal_free(void) {
+    if (i2c_device >= 0) {
+        close(i2c_device);
+        i2c_device = -1;
+        i2c_address = 0;
+    }
+}
+
+/**
+ * Execute one read transaction on the I2C bus, reading a given number of bytes.
+ * If the device does not acknowledge the read command, an error shall be
+ * returned.
+ *
+ * @param address 7-bit I2C address to read from
+ * @param data    pointer to the buffer where the data is to be stored
+ * @param count   number of bytes to read from I2C and store in the buffer
+ * @returns 0 on success, error code otherwise
+ */
+int8_t SensirionDriver::sensirion_i2c_hal_read(uint8_t address, uint8_t* data, uint16_t count) {
+    if (i2c_address != address) {
+        ioctl(i2c_device, I2C_SLAVE, address);
+        i2c_address = address;
+    }
+
+    if (read(i2c_device, data, count) != count) {
+        return I2C_READ_FAILED;
+    }
+    return 0;
+}
+
+/**
+ * Execute one write transaction on the I2C bus, sending a given number of
+ * bytes. The bytes in the supplied buffer must be sent to the given address. If
+ * the slave device does not acknowledge any of the bytes, an error shall be
+ * returned.
+ *
+ * @param address 7-bit I2C address to write to
+ * @param data    pointer to the buffer containing the data to write
+ * @param count   number of bytes to read from the buffer and send over I2C
+ * @returns 0 on success, error code otherwise
+ */
+int8_t SensirionDriver::sensirion_i2c_hal_write(uint8_t address, const uint8_t* data,
+                               uint16_t count) {
+    if (i2c_address != address) {
+        ioctl(i2c_device, I2C_SLAVE, address);
+        i2c_address = address;
+    }
+
+    if (write(i2c_device, data, count) != count) {
+        return I2C_WRITE_FAILED;
+    }
+    return 0;
+}
+
+/**
+ * Sleep for a given number of microseconds. The function should delay the
+ * execution for at least the given time, but may also sleep longer.
+ *
+ * @param useconds the sleep time in microseconds
+ */
+void SensirionDriver::sensirion_i2c_hal_sleep_usec(uint32_t useconds) {
+    usleep(useconds);
+}
+
+SensirionDriver::SensirionDriver()
+{
+    this->i2c_device = -1;
+    this->i2c_address = 0;
+}
+
+
+
+
+
+uint8_t SensirionDriver::sensirion_i2c_generate_crc(const uint8_t* data, uint16_t count) {
     uint16_t current_byte;
     uint8_t crc = CRC8_INIT;
     uint8_t crc_bit;
@@ -52,19 +115,19 @@ uint8_t sensirion_i2c_generate_crc(const uint8_t* data, uint16_t count) {
     return crc;
 }
 
-int8_t sensirion_i2c_check_crc(const uint8_t* data, uint16_t count,
+int8_t SensirionDriver::sensirion_i2c_check_crc(const uint8_t* data, uint16_t count,
                                uint8_t checksum) {
     if (sensirion_i2c_generate_crc(data, count) != checksum)
         return CRC_ERROR;
     return NO_ERROR;
 }
 
-int16_t sensirion_i2c_general_call_reset(void) {
+int16_t SensirionDriver::sensirion_i2c_general_call_reset(void) {
     const uint8_t data = 0x06;
     return sensirion_i2c_hal_write(0, &data, (uint16_t)sizeof(data));
 }
 
-uint16_t sensirion_i2c_fill_cmd_send_buf(uint8_t* buf, uint16_t cmd,
+uint16_t SensirionDriver::sensirion_i2c_fill_cmd_send_buf(uint8_t* buf, uint16_t cmd,
                                          const uint16_t* args,
                                          uint8_t num_args) {
     uint8_t i;
@@ -84,7 +147,7 @@ uint16_t sensirion_i2c_fill_cmd_send_buf(uint8_t* buf, uint16_t cmd,
     return idx;
 }
 
-int16_t sensirion_i2c_read_words_as_bytes(uint8_t address, uint8_t* data,
+int16_t SensirionDriver::sensirion_i2c_read_words_as_bytes(uint8_t address, uint8_t* data,
                                           uint16_t num_words) {
     int16_t ret;
     uint16_t i, j;
@@ -111,7 +174,7 @@ int16_t sensirion_i2c_read_words_as_bytes(uint8_t address, uint8_t* data,
     return NO_ERROR;
 }
 
-int16_t sensirion_i2c_read_words(uint8_t address, uint16_t* data_words,
+int16_t SensirionDriver::sensirion_i2c_read_words(uint8_t address, uint16_t* data_words,
                                  uint16_t num_words) {
     int16_t ret;
     uint8_t i;
@@ -129,14 +192,14 @@ int16_t sensirion_i2c_read_words(uint8_t address, uint16_t* data_words,
     return NO_ERROR;
 }
 
-int16_t sensirion_i2c_write_cmd(uint8_t address, uint16_t command) {
+int16_t SensirionDriver::sensirion_i2c_write_cmd(uint8_t address, uint16_t command) {
     uint8_t buf[SENSIRION_COMMAND_SIZE];
 
     sensirion_i2c_fill_cmd_send_buf(buf, command, NULL, 0);
     return sensirion_i2c_hal_write(address, buf, SENSIRION_COMMAND_SIZE);
 }
 
-int16_t sensirion_i2c_write_cmd_with_args(uint8_t address, uint16_t command,
+int16_t SensirionDriver::sensirion_i2c_write_cmd_with_args(uint8_t address, uint16_t command,
                                           const uint16_t* data_words,
                                           uint16_t num_words) {
     uint8_t buf[SENSIRION_MAX_BUFFER_WORDS];
@@ -147,7 +210,7 @@ int16_t sensirion_i2c_write_cmd_with_args(uint8_t address, uint16_t command,
     return sensirion_i2c_hal_write(address, buf, buf_size);
 }
 
-int16_t sensirion_i2c_delayed_read_cmd(uint8_t address, uint16_t cmd,
+int16_t SensirionDriver::sensirion_i2c_delayed_read_cmd(uint8_t address, uint16_t cmd,
                                        uint32_t delay_us, uint16_t* data_words,
                                        uint16_t num_words) {
     int16_t ret;
@@ -164,20 +227,20 @@ int16_t sensirion_i2c_delayed_read_cmd(uint8_t address, uint16_t cmd,
     return sensirion_i2c_read_words(address, data_words, num_words);
 }
 
-int16_t sensirion_i2c_read_cmd(uint8_t address, uint16_t cmd,
+int16_t SensirionDriver::sensirion_i2c_read_cmd(uint8_t address, uint16_t cmd,
                                uint16_t* data_words, uint16_t num_words) {
     return sensirion_i2c_delayed_read_cmd(address, cmd, 0, data_words,
                                           num_words);
 }
 
-uint16_t sensirion_i2c_add_command_to_buffer(uint8_t* buffer, uint16_t offset,
+uint16_t SensirionDriver::sensirion_i2c_add_command_to_buffer(uint8_t* buffer, uint16_t offset,
                                              uint16_t command) {
     buffer[offset++] = (uint8_t)((command & 0xFF00) >> 8);
     buffer[offset++] = (uint8_t)((command & 0x00FF) >> 0);
     return offset;
 }
 
-uint16_t sensirion_i2c_add_uint32_t_to_buffer(uint8_t* buffer, uint16_t offset,
+uint16_t SensirionDriver::sensirion_i2c_add_uint32_t_to_buffer(uint8_t* buffer, uint16_t offset,
                                               uint32_t data) {
     buffer[offset++] = (uint8_t)((data & 0xFF000000) >> 24);
     buffer[offset++] = (uint8_t)((data & 0x00FF0000) >> 16);
@@ -193,12 +256,12 @@ uint16_t sensirion_i2c_add_uint32_t_to_buffer(uint8_t* buffer, uint16_t offset,
     return offset;
 }
 
-uint16_t sensirion_i2c_add_int32_t_to_buffer(uint8_t* buffer, uint16_t offset,
+uint16_t SensirionDriver::sensirion_i2c_add_int32_t_to_buffer(uint8_t* buffer, uint16_t offset,
                                              int32_t data) {
     return sensirion_i2c_add_uint32_t_to_buffer(buffer, offset, (uint32_t)data);
 }
 
-uint16_t sensirion_i2c_add_uint16_t_to_buffer(uint8_t* buffer, uint16_t offset,
+uint16_t SensirionDriver::sensirion_i2c_add_uint16_t_to_buffer(uint8_t* buffer, uint16_t offset,
                                               uint16_t data) {
     buffer[offset++] = (uint8_t)((data & 0xFF00) >> 8);
     buffer[offset++] = (uint8_t)((data & 0x00FF) >> 0);
@@ -209,12 +272,12 @@ uint16_t sensirion_i2c_add_uint16_t_to_buffer(uint8_t* buffer, uint16_t offset,
     return offset;
 }
 
-uint16_t sensirion_i2c_add_int16_t_to_buffer(uint8_t* buffer, uint16_t offset,
+uint16_t SensirionDriver::sensirion_i2c_add_int16_t_to_buffer(uint8_t* buffer, uint16_t offset,
                                              int16_t data) {
     return sensirion_i2c_add_uint16_t_to_buffer(buffer, offset, (uint16_t)data);
 }
 
-uint16_t sensirion_i2c_add_float_to_buffer(uint8_t* buffer, uint16_t offset,
+uint16_t SensirionDriver::sensirion_i2c_add_float_to_buffer(uint8_t* buffer, uint16_t offset,
                                            float data) {
     union {
         uint32_t uint32_data;
@@ -237,7 +300,7 @@ uint16_t sensirion_i2c_add_float_to_buffer(uint8_t* buffer, uint16_t offset,
     return offset;
 }
 
-uint16_t sensirion_i2c_add_bytes_to_buffer(uint8_t* buffer, uint16_t offset,
+uint16_t SensirionDriver::sensirion_i2c_add_bytes_to_buffer(uint8_t* buffer, uint16_t offset,
                                            const uint8_t* data,
                                            uint16_t data_length) {
     uint16_t i;
@@ -258,12 +321,12 @@ uint16_t sensirion_i2c_add_bytes_to_buffer(uint8_t* buffer, uint16_t offset,
     return offset;
 }
 
-int16_t sensirion_i2c_write_data(uint8_t address, const uint8_t* data,
+int16_t SensirionDriver::sensirion_i2c_write_data(uint8_t address, const uint8_t* data,
                                  uint16_t data_length) {
     return sensirion_i2c_hal_write(address, data, data_length);
 }
 
-int16_t sensirion_i2c_read_data_inplace(uint8_t address, uint8_t* buffer,
+int16_t SensirionDriver::sensirion_i2c_read_data_inplace(uint8_t address, uint8_t* buffer,
                                         uint16_t expected_data_length) {
     int16_t error;
     uint16_t i, j;

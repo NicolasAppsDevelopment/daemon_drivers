@@ -241,7 +241,7 @@ int bme680_get_measure(float* t, float* p, float* h) {
         *p = data->pressure;
         *h = data->humidity;
 
-        printf("Data received : %f °C, %f Pa, %f %\n", data->temperature, data->pressure, data->humidity);
+        printf("Data received from BME680: %f °C, %f Pa, %f %\n", data->temperature, data->pressure, data->humidity);
     }
 
     return (int)rslt;
