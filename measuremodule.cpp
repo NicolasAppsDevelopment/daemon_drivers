@@ -359,7 +359,7 @@ void MeasureModule::reset()
     }
 
     while (SHTC3_driver.shtc1_probe() != STATUS_OK) {
-        printf("SHTC3 sensor probing failed\n");
+        printf("SHTC3 sensor probing failed: %d\n", SHTC3_driver.shtc1_probe());
         sleep(1);
     }
     printf("SHTC3 sensor probing successful\n");
