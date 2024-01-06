@@ -43,7 +43,7 @@ class MeasureModule
 
         int altitude;
         bool stopped;
-        mutex STC31_calibrating;
+        mutex busy_sensirion_driver;
 
         STC31Driver STC31_driver;
         SHTC3Driver SHTC3_driver;
