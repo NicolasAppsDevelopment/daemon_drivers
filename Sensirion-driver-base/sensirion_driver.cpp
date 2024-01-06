@@ -95,8 +95,6 @@ SensirionDriver::SensirionDriver()
 
 
 
-
-
 uint8_t SensirionDriver::sensirion_i2c_generate_crc(const uint8_t* data, uint16_t count) {
     uint16_t current_byte;
     uint8_t crc = CRC8_INIT;
