@@ -43,7 +43,9 @@ int16_t SHTC3Driver::shtc1_measure(void) {
 
 int16_t SHTC3Driver::shtc1_read(int32_t* temperature, int32_t* humidity) {
     uint16_t words[2];
-    int16_t ret = sensirion_i2c_read_words(SHTC1_ADDRESS, words, 2);
+    printf("sensirion_i2c_read_words num_words: %d", SENSIRION_NUM_WORDS(words));
+    int16_t ret = sensirion_i2c_read_words(SHTC1_ADDRESS, words,
+                                           SENSIRION_NUM_WORDS(words));
     /**
      * formulas for conversion of the sensor signals, optimized for fixed point
      * algebra:
