@@ -117,8 +117,10 @@ uint8_t SensirionDriver::sensirion_i2c_generate_crc(const uint8_t* data, uint16_
 
 int8_t SensirionDriver::sensirion_i2c_check_crc(const uint8_t* data, uint16_t count,
                                uint8_t checksum) {
-    if (sensirion_i2c_generate_crc(data, count) != checksum)
+    if (sensirion_i2c_generate_crc(data, count) != checksum) {
+        printf("CRC error detected!");
         return CRC_ERROR;
+    }
     return NO_ERROR;
 }
 
