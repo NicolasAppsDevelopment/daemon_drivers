@@ -28,6 +28,7 @@ int16_t SHTC3Driver::shtc1_measure_blocking_read(int32_t* temperature, int32_t* 
 
     ret = shtc1_measure();
     if (ret)
+        printf("shtc1_measure return error: %d", ret);
         return ret;
 #if !defined(USE_SENSIRION_CLOCK_STRETCHING) || !USE_SENSIRION_CLOCK_STRETCHING
     sensirion_i2c_hal_sleep_usec(SHTC1_MEASUREMENT_DURATION_USEC);
