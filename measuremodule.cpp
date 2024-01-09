@@ -24,9 +24,9 @@ void MeasureModule::BME680_measure_clock()
                         throw DriverError("Impossible de récupérer les données de mesure du capteurs BME680. La fonction [bme680_get_measure] a retourné le code d'erreur : " + to_string(error));
                     }
                 } else {
-                    addHumiditySample(humidity);
+                    //addHumiditySample(humidity); DISABLED: LOW PRECISION
                     addPressureSample(pressure);
-                    addTemperatureSample(temperature);
+                    //addTemperatureSample(temperature); DISABLED: LOW PRECISION
                 }
             } catch (const DriverError& e) {
                 error_array.push_front(e);
@@ -53,9 +53,9 @@ void MeasureModule::SHTC3_measure_clock()
                 float humidity;
                 float temperature;
 
-                this->busy_sensirion_driver.lock();
+                //this->SHTC3_driver_mutex.lock();
                 error = SHTC3_driver.shtc1_measure_blocking_read(&temp, &humid);
-                this->busy_sensirion_driver.unlock();
+                //this->SHTC3_driver_mutex.unlock();
 
                 if (error) {
                     throw DriverError("Impossible de récupérer les données de mesure du capteurs SHTC3. La fonction [shtc1_measure_blocking_read] a retourné le code d'erreur : " + to_string(error));
@@ -94,9 +94,9 @@ void MeasureModule::STC31_measure_clock()
                 float gas;
                 float temperature;
 
-                this->busy_sensirion_driver.lock();
+                this->STC31_driver_mutex.lock();
                 error = STC31_driver.stc3x_measure_gas_concentration(&gas_ticks, &temperature_ticks);
-                this->busy_sensirion_driver.unlock();
+                this->STC31_driver_mutex.unlock();
 
                 if (error) {
                     throw DriverError("Impossible de récupérer les données de mesure du capteurs STC31. La fonction [stc3x_measure_gas_concentration] a retourné le code d'erreur : " + to_string(error));
@@ -158,22 +158,32 @@ void MeasureModule::STC31_calibration_clock()
 
                     uint16_t hum = humidity * 65535 / 100;
 
-                    this->busy_sensirion_driver.lock();
+                    this->STC31_driver_mutex.lock();
                     error = STC31_driver.stc3x_set_relative_humidity(hum);
-                    this->busy_sensirion_driver.unlock();
+                    this->STC31_driver_mutex.unlock();
 
                     if (error) {
                         throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_relative_humidity] a retourné le code d'erreur : " + to_string(error));
                     }
 
-                    uint16_t pres = pressure;
+                    uint16_t pres = pressure / 100; // Pa to mbar (hPa)
 
-                    this->busy_sensirion_driver.lock();
+                    this->STC31_driver_mutex.lock();
                     error = STC31_driver.stc3x_set_pressure(pres);
-                    this->busy_sensirion_driver.unlock();
+                    this->STC31_driver_mutex.unlock();
 
                     if (error) {
                         throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_pressure] a retourné le code d'erreur : " + to_string(error));
+                    }
+
+                    uint16_t temp = temperature * 200;
+
+                    this->STC31_driver_mutex.lock();
+                    error = STC31_driver.stc3x_set_temperature(temp);
+                    this->STC31_driver_mutex.unlock();
+
+                    if (error) {
+                        throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_temperature] a retourné le code d'erreur : " + to_string(error));
                     }
 
                     printf("STC31 calibrated with data : %f °C, %f Pa, %f %, %d m\n", temperature, pressure, humidity, this->altitude);
@@ -317,7 +327,7 @@ MeasureModule::MeasureModule()
 
 void MeasureModule::reset()
 {
-    this->busy_sensirion_driver.unlock();
+    this->STC31_driver_mutex.unlock();
     this->altitude = 0;
     this->error_array.clear();
     this->temperature_array.clear();
@@ -338,17 +348,17 @@ void MeasureModule::reset()
     }
 
     uint16_t self_test_output;
-    this->busy_sensirion_driver.lock();
+    this->STC31_driver_mutex.lock();
     error = STC31_driver.stc3x_self_test(&self_test_output);
-    this->busy_sensirion_driver.unlock();
+    this->STC31_driver_mutex.unlock();
     if (error) {
         error_array.push_front(DriverError("L'auto-test du capteur STC31 a échoué. La fonction [stc3x_self_test] a retourné le code d'erreur : " + to_string(error)));
         return;
     }
 
-    this->busy_sensirion_driver.lock();
+    this->STC31_driver_mutex.lock();
     error = STC31_driver.stc3x_set_binary_gas(0x0001);
-    this->busy_sensirion_driver.unlock();
+    this->STC31_driver_mutex.unlock();
     if (error) {
         error_array.push_front(DriverError("La défénition du mode de relève du CO2 a échoué. La fonction [stc3x_set_binary_gas] a retourné le code d'erreur : " + to_string(error)));
         return;
@@ -362,12 +372,12 @@ void MeasureModule::reset()
         return;
     }
 
-    this->busy_sensirion_driver.lock();
+    this->STC31_driver_mutex.lock();
     while (SHTC3_driver.shtc1_probe() != STATUS_OK) {
         printf("SHTC3 sensor probing failed: %d\n", SHTC3_driver.shtc1_probe());
         sleep(1);
     }
-    this->busy_sensirion_driver.unlock();
+    this->STC31_driver_mutex.unlock();
     printf("SHTC3 sensor probing successful\n");
 
     /* BME680 init */

@@ -11,8 +11,8 @@
 #include "SHTC3-driver/shtc3.h"
 using namespace std;
 
-#define NB_TEMPERATURE_SENSOR 3
-#define NB_HUMIDITY_SENSOR 2
+#define NB_TEMPERATURE_SENSOR 2
+#define NB_HUMIDITY_SENSOR 1
 #define NB_PRESSURE_SENSOR 1
 #define NB_CO2_SENSOR 1
 #define NB_O2_SENSOR 1
@@ -43,7 +43,7 @@ class MeasureModule
 
         int altitude;
         bool stopped;
-        mutex busy_sensirion_driver;
+        mutex STC31_driver_mutex;
 
         STC31Driver STC31_driver;
         SHTC3Driver SHTC3_driver;

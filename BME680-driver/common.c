@@ -173,15 +173,13 @@ int bme680_set_mode_forced(){
 
     conf.filter = BME68X_FILTER_OFF;
     conf.odr = BME68X_ODR_NONE;
-    conf.os_hum = BME68X_OS_16X;
+    conf.os_hum = BME68X_OS_NONE; // DISABLED: LOW PRECISION
     conf.os_pres = BME68X_OS_1X;
-    conf.os_temp = BME68X_OS_2X;
+    conf.os_temp = BME68X_OS_NONE; // DISABLED: LOW PRECISION
     rslt = bme68x_set_conf(&conf,&bme_api_dev);
     bme68x_check_rslt("bme68x_set_conf",rslt);
 
-    heatr_conf.enable = BME68X_ENABLE;
-    heatr_conf.heatr_temp = 300;
-    heatr_conf.heatr_dur = 100;
+    heatr_conf.enable = BME68X_DISABLE; // disable IAQ measurements
     rslt = bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf,&bme_api_dev);
     bme68x_check_rslt("bme68x_set_heatr_conf",rslt);
 
@@ -237,11 +235,11 @@ int bme680_get_measure(float* t, float* p, float* h) {
     bme68x_check_rslt("bme68x_get_data", rslt);
 
     if (n_fields) {
-        *t = data->temperature;
+        //*t = data->temperature;
         *p = data->pressure;
-        *h = data->humidity;
+        //*h = data->humidity;
 
-        printf("Data received from BME680: %f °C, %f Pa, %f %\n", data->temperature, data->pressure, data->humidity);
+        printf("Data received from BME680: %f Pa\n", data->pressure);
     }
 
     return (int)rslt;
