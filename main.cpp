@@ -197,7 +197,8 @@ int main() {
         }
 
         // Handle the client in a separate function
-        handleClient(clientSocket);
+        thread t(handleClient, clientSocket);
+        t.detach();
     }
 
     // Close the server socket (this part will not be reached)

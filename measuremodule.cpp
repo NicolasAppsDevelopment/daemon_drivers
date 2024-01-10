@@ -331,6 +331,12 @@ MeasureModule::MeasureModule()
 
 void MeasureModule::reset()
 {
+    thread t(&MeasureModule::reset_function, this);
+    t.detach();
+}
+
+void MeasureModule::reset_function()
+{
     this->stopped = true;
     this->initialising = true;
     this->altitude = 0;

@@ -28,6 +28,7 @@ class MeasureModule
         void SHTC3_measure_clock();
         void BME680_measure_clock();
         void STC31_calibration_clock();
+        void reset_function();
 
         list<DriverError> error_array;
         void addTemperatureSample(float);
