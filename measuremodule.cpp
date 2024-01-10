@@ -314,7 +314,6 @@ MeasureModule::MeasureModule()
     this->STC31_driver = STC31Driver();
     this->SHTC3_driver = SHTC3Driver();
 
-    this->stopped = true;
     reset();
 
     thread t(&MeasureModule::STC31_measure_clock, this);
@@ -332,8 +331,8 @@ MeasureModule::MeasureModule()
 
 void MeasureModule::reset()
 {
+    this->stopped = true;
     this->initialising = true;
-    this->STC31_driver_mutex.unlock();
     this->altitude = 0;
     this->error_array.clear();
     this->temperature_array.clear();
@@ -350,6 +349,7 @@ void MeasureModule::reset()
     error = STC31_driver.sensirion_i2c_hal_init();
     if (error) {
         error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur STC31. La fonction [sensirion_i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
+        this->initialising = false;
         return;
     }
 
@@ -359,6 +359,7 @@ void MeasureModule::reset()
     this->STC31_driver_mutex.unlock();
     if (error) {
         error_array.push_front(DriverError("L'auto-test du capteur STC31 a échoué. La fonction [stc3x_self_test] a retourné le code d'erreur : " + to_string(error)));
+        this->initialising = false;
         return;
     }
 
@@ -367,6 +368,7 @@ void MeasureModule::reset()
     this->STC31_driver_mutex.unlock();
     if (error) {
         error_array.push_front(DriverError("La défénition du mode de relève du CO2 a échoué. La fonction [stc3x_set_binary_gas] a retourné le code d'erreur : " + to_string(error)));
+        this->initialising = false;
         return;
     }
 
@@ -375,15 +377,15 @@ void MeasureModule::reset()
     error = SHTC3_driver.sensirion_i2c_hal_init();
     if (error) {
         error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur SHTC3. La fonction [sensirion_i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
+        this->initialising = false;
         return;
     }
 
-    this->STC31_driver_mutex.lock();
     while (SHTC3_driver.shtc1_probe() != STATUS_OK) {
         printf("SHTC3 sensor probing failed: %d\n", SHTC3_driver.shtc1_probe());
         sleep(1);
     }
-    this->STC31_driver_mutex.unlock();
+
     printf("SHTC3 sensor probing successful\n");
 
     /* BME680 init */
@@ -391,12 +393,14 @@ void MeasureModule::reset()
     error = i2c_hal_init();
     if (error) {
         error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur BME680. La fonction [i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
+        this->initialising = false;
         return;
     }
 
     error = bme680_self_test();
     if (error) {
         error_array.push_front(DriverError("L'auto-test du capteur BME680 a échoué. La fonction [bme680_self_test] a retourné le code d'erreur : " + to_string(error)));
+        this->initialising = false;
         return;
     }
 
