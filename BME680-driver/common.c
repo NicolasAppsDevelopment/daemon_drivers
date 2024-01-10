@@ -55,7 +55,7 @@ int8_t bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len)
         printf("user_i2c_read_reg");
         rslt = I2C_READ_FAILED;
     }
-    if (read(i2c_device, reg_data, len) != len) {
+    if (read(i2c_device, reg_data, len) != (int)len) {
         printf("user_i2c_read_data");
         rslt = I2C_READ_FAILED;
     }
@@ -84,7 +84,7 @@ int8_t bme68x_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len)
     for (int i=1; i<(int)len+1; i++)
        reg[i] = reg_data[i-1];
 
-    if (write(i2c_device, reg, len+1) != len+1) {
+    if (write(i2c_device, reg, len+1) != (int)len+1) {
         printf("user_i2c_write");
         rslt = I2C_READ_FAILED;
     }
