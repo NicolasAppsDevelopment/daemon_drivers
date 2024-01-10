@@ -43,6 +43,7 @@ class MeasureModule
 
         int altitude;
         bool stopped;
+        bool initialising;
         mutex STC31_driver_mutex;
 
         STC31Driver STC31_driver;
@@ -54,6 +55,7 @@ class MeasureModule
         SensorMeasure* get();
         void setAltitude(int altitude);
         string get_errors();
+        bool isInitialising();
 };
 
 #endif // MEASUREMODULE_H
