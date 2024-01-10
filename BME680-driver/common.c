@@ -44,7 +44,7 @@ static uint8_t i2c_address = 0;
  * @param count   number of bytes to read from I2C and store in the buffer
  * @returns 0 on success, error code otherwise
  */
-int8_t bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint16_t len, void *intf_ptr)
+int8_t bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len)
 {
     int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
 
@@ -74,14 +74,14 @@ int8_t bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint16_t len, void *
  * @param count   number of bytes to read from the buffer and send over I2C
  * @returns 0 on success, error code otherwise
  */
-int8_t bme68x_i2c_write(uint8_t reg_addr, uint8_t *reg_data, uint16_t len, void *intf_ptr)
+int8_t bme68x_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len)
 {
     int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
 
     uint8_t reg[16];
     reg[0]=reg_addr;
 
-    for (int i=1; i<len+1; i++)
+    for (int i=1; i<(int)len+1; i++)
        reg[i] = reg_data[i-1];
 
     if (write(i2c_device, reg, len+1) != len+1) {
@@ -135,6 +135,24 @@ void bme68x_check_rslt(const char api_name[], int8_t rslt)
     }
 }
 
+int bme680_set_mode_forced(){
+    int8_t rslt = BME68X_OK;
+
+    conf.filter = BME68X_FILTER_OFF;
+    conf.odr = BME68X_ODR_NONE;
+    conf.os_hum = BME68X_OS_NONE; // DISABLED: LOW PRECISION
+    conf.os_pres = BME68X_OS_1X;
+    conf.os_temp = BME68X_OS_NONE; // DISABLED: LOW PRECISION
+    rslt = bme68x_set_conf(&conf,&bme_api_dev);
+    bme68x_check_rslt("bme68x_set_conf",rslt);
+
+    heatr_conf.enable = BME68X_DISABLE; // disable IAQ measurements
+    rslt = bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf,&bme_api_dev);
+    bme68x_check_rslt("bme68x_set_heatr_conf",rslt);
+
+    return (int)rslt;
+}
+
 /**
  * Initialize all hard- and software components that are needed for the I2C
  * communication.
@@ -164,24 +182,6 @@ int i2c_hal_init(void) {
     bme68x_check_rslt("bme68x_init",rslt);
 
     rslt = bme680_set_mode_forced();//default mode, can be overridden by bme688_set_mode()
-
-    return (int)rslt;
-}
-
-int bme680_set_mode_forced(){
-    int8_t rslt = BME68X_OK;
-
-    conf.filter = BME68X_FILTER_OFF;
-    conf.odr = BME68X_ODR_NONE;
-    conf.os_hum = BME68X_OS_NONE; // DISABLED: LOW PRECISION
-    conf.os_pres = BME68X_OS_1X;
-    conf.os_temp = BME68X_OS_NONE; // DISABLED: LOW PRECISION
-    rslt = bme68x_set_conf(&conf,&bme_api_dev);
-    bme68x_check_rslt("bme68x_set_conf",rslt);
-
-    heatr_conf.enable = BME68X_DISABLE; // disable IAQ measurements
-    rslt = bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf,&bme_api_dev);
-    bme68x_check_rslt("bme68x_set_heatr_conf",rslt);
 
     return (int)rslt;
 }
@@ -218,7 +218,7 @@ int bme680_self_test() {
 }
 
 
-int bme680_get_measure(float* t, float* p, float* h) {
+int bme680_get_measure(float* p) {
     int8_t rslt;
 
     rslt = bme68x_set_op_mode(BME68X_FORCED_MODE, &bme_api_dev);
@@ -227,7 +227,7 @@ int bme680_get_measure(float* t, float* p, float* h) {
     /* Calculate delay period in microseconds */
     uint32_t del_period;
     del_period = bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, &bme_api_dev) + (heatr_conf.heatr_dur * 1000);
-    bme_api_dev.delay_us(del_period, bme_api_dev.intf_ptr);
+    bme_api_dev.delay_us(del_period);
 
     /* Check if rslt == BME68X_OK, report or handle if otherwise */
     uint8_t n_fields;

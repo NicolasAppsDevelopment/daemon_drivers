@@ -660,8 +660,7 @@
  * @retval 0 for Success
  * @retval Non-zero for Failure
  */
-typedef BME68X_INTF_RET_TYPE (*bme68x_read_fptr_t)(uint8_t reg_addr, uint8_t *reg_data, uint32_t length,
-                                                   void *intf_ptr);
+typedef BME68X_INTF_RET_TYPE (*bme68x_read_fptr_t)(uint8_t reg_addr, uint8_t *reg_data, uint32_t length);
 
 /*!
  * @brief Bus communication function pointer which should be mapped to
@@ -676,8 +675,7 @@ typedef BME68X_INTF_RET_TYPE (*bme68x_read_fptr_t)(uint8_t reg_addr, uint8_t *re
  * @retval Non-zero for Failure
  *
  */
-typedef BME68X_INTF_RET_TYPE (*bme68x_write_fptr_t)(uint8_t reg_addr, const uint8_t *reg_data, uint32_t length,
-                                                    void *intf_ptr);
+typedef BME68X_INTF_RET_TYPE (*bme68x_write_fptr_t)(uint8_t reg_addr, const uint8_t *reg_data, uint32_t length);
 
 /*!
  * @brief Delay function pointer which should be mapped to
@@ -687,7 +685,7 @@ typedef BME68X_INTF_RET_TYPE (*bme68x_write_fptr_t)(uint8_t reg_addr, const uint
  * @param[in,out] intf_ptr : Void pointer that can enable the linking of descriptors
  *                           for interface related callbacks
  */
-typedef void (*bme68x_delay_us_fptr_t)(uint32_t period, void *intf_ptr);
+typedef void (*bme68x_delay_us_fptr_t)(uint32_t period);
 
 /*
  * @brief Generic communication function pointer

@@ -78,25 +78,25 @@ int16_t SHTC3Driver::shtc1_read_serial(uint32_t* serial) {
     const uint16_t tx_words[] = {0x007B};
     uint16_t serial_words[SENSIRION_NUM_WORDS(*serial)];
 
-    ret = sensirion_i2c_write_cmd_with_args(SHTC1_ADDRESS, 0xC595, tx_words,
-                                            SENSIRION_NUM_WORDS(tx_words));
-    if (ret)
+    ret = sensirion_i2c_write_cmd_with_args(SHTC1_ADDRESS, 0xC595, tx_words, SENSIRION_NUM_WORDS(tx_words));
+    if (ret) {
         printf("err sensirion_i2c_write_cmd_with_args");
         return ret;
+    }
 
     sensirion_i2c_hal_sleep_usec(SHTC1_CMD_DURATION_USEC);
 
-    ret = sensirion_i2c_delayed_read_cmd(
-        SHTC1_ADDRESS, 0xC7F7, SHTC1_CMD_DURATION_USEC, &serial_words[0], 1);
-    if (ret)
+    ret = sensirion_i2c_delayed_read_cmd(SHTC1_ADDRESS, 0xC7F7, SHTC1_CMD_DURATION_USEC, &serial_words[0], 1);
+    if (ret) {
         printf("err sensirion_i2c_delayed_read_cmd");
         return ret;
+    }
 
-    ret = sensirion_i2c_delayed_read_cmd(
-        SHTC1_ADDRESS, 0xC7F7, SHTC1_CMD_DURATION_USEC, &serial_words[1], 1);
-    if (ret)
+    ret = sensirion_i2c_delayed_read_cmd(SHTC1_ADDRESS, 0xC7F7, SHTC1_CMD_DURATION_USEC, &serial_words[1], 1);
+    if (ret) {
         printf("err sensirion_i2c_delayed_read_cmd 2");
         return ret;
+    }
 
     *serial = ((uint32_t)serial_words[0] << 16) | serial_words[1];
     return ret;

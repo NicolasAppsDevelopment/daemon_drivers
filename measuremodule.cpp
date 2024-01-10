@@ -14,19 +14,15 @@ void MeasureModule::BME680_measure_clock()
             try {
                 int16_t error = 0;
 
-                float temperature;
-                float humidity;
                 float pressure;
 
-                error = bme680_get_measure(&temperature, &pressure, &humidity);
+                error = bme680_get_measure(&pressure);
                 if (error) {
                     if (error != 2) { // DO NOT THROW ERROR IF IT'S A NO NEW DATA ERROR
                         throw DriverError("Impossible de récupérer les données de mesure du capteurs BME680. La fonction [bme680_get_measure] a retourné le code d'erreur : " + to_string(error));
                     }
                 } else {
-                    //addHumiditySample(humidity); DISABLED: LOW PRECISION
                     addPressureSample(pressure);
-                    //addTemperatureSample(temperature); DISABLED: LOW PRECISION
                 }
             } catch (const DriverError& e) {
                 error_array.push_front(e);
@@ -64,7 +60,7 @@ void MeasureModule::SHTC3_measure_clock()
                 humidity = (float)humid / 1000.0;
                 temperature = (float)temp / 1000.0;
 
-                printf("Data received from SHTC3: %f °C, %f %\n", temperature, humidity);
+                printf("Data received from SHTC3: \t %f °C \t %f percent\n", temperature, humidity);
 
                 addHumiditySample(humidity);
                 addTemperatureSample(temperature);
@@ -105,7 +101,7 @@ void MeasureModule::STC31_measure_clock()
                 gas = 100 * ((float)gas_ticks - 16384.0) / 32768.0;
                 temperature = (float)temperature_ticks / 200.0;
 
-                printf("Data received from STC31: %f °C, %f %vol\n", temperature, gas);
+                printf("Data received from STC31: \t %f °C \t %f percent_vol\n", temperature, gas);
 
                 addCO2Sample(gas);
                 addTemperatureSample(temperature);
@@ -186,7 +182,7 @@ void MeasureModule::STC31_calibration_clock()
                         throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_temperature] a retourné le code d'erreur : " + to_string(error));
                     }
 
-                    printf("STC31 calibrated with data : %f °C, %f Pa, %f %, %d m\n", temperature, pressure, humidity, this->altitude);
+                    printf("STC31 calibrated with data: \t %f °C \t %f Pa \t %f percent \t %d m\n", temperature, pressure, humidity, this->altitude);
 
                 }
             } catch (const DriverError& e) {

@@ -30,10 +30,10 @@ vector<string> getArgs(char* buffer) {
     vector<string> args;
 
     int startIndex = 0, endIndex = 0;
-    for (int i = 0; i <= str.size(); i++) {
+    for (int i = 0; i <= (int)str.size(); i++) {
 
         // If we reached the end of the word or the end of the input.
-        if (str[i] == separator || i == str.size()) {
+        if (str[i] == separator || i == (int)str.size()) {
             endIndex = i;
             string temp;
             temp.append(str, startIndex, endIndex - startIndex);
