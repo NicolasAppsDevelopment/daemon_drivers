@@ -74,7 +74,11 @@ string getErrors() {
 string getSensorMeasure() {
     SensorMeasure* data = mm->get();
     if (data == nullptr) {
-        return formatError("Le dispositif de mesure a été intérrompu probablement à la suite d'une erreur. Pour plus d'information, consultez les erreurs avec GET_ERRORS puis tentez de le réinitialiser avec RESET.");
+        if (mm->isInitialising()) {
+            return formatError("Le dispositif de mesure n'a fini de s'initialiser.");
+        } else {
+            return formatError("Le dispositif de mesure a probablement été intérrompu à la suite d'une erreur. Pour plus d'information, consultez les erreurs avec GET_ERRORS puis tentez de le réinitialiser avec RESET.");
+        }
     }
 
     string res = formatSendData(data);

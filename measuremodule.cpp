@@ -292,17 +292,22 @@ float MeasureModule::getAverage(list<float> array)
 
 string MeasureModule::get_errors()
 {
-    string res = "{\"success\": false, \"errors\": [";
+    string res = "{\"success\": true, \"errors\": [";
     for (auto const& e : error_array) {
         res += "{\"occuredDate\": \"" + e.occuredDate + "\", \"message\": \"" + e.message + "\"},";
     }
+    if (error_array.size() > 0) {
+        res.pop_back();
+    }
 
-    res.pop_back();
     res += "]}\0";
     return res;
 }
 
-
+bool MeasureModule::isInitialising()
+{
+    return this->initialising;
+}
 
 MeasureModule::MeasureModule()
 {
@@ -327,6 +332,7 @@ MeasureModule::MeasureModule()
 
 void MeasureModule::reset()
 {
+    this->initialising = true;
     this->STC31_driver_mutex.unlock();
     this->altitude = 0;
     this->error_array.clear();
@@ -395,11 +401,12 @@ void MeasureModule::reset()
     }
 
     this->stopped = false;
+    this->initialising = false;
 }
 
 SensorMeasure* MeasureModule::get()
 {
-    if (stopped) {
+    if (stopped || initialising) {
         return nullptr;
     }
 
