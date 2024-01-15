@@ -37,6 +37,36 @@ void MeasureModule::BME680_measure_clock()
     }
 }
 
+void MeasureModule::TSL2561_measure_clock()
+{
+    while (true) {
+        if (!stopped) {
+            try {
+                /*int8_t error = 0;*/
+
+                long lux;
+                lux = TSL2561_driver.readVisibleLux();
+
+                /*if (error) {
+                    throw DriverError("Impossible de récupérer les données de mesure du capteurs TSL2561. La fonction [readVisibleLux] a retourné le code d'erreur : " + to_string(error));
+                }*/
+
+                printf("Data received from TSL2561: \t %f Lux\n", lux);
+
+                addLuminositySample(lux);
+            } catch (const DriverError& e) {
+                error_array.push_front(e);
+                this->stopped = true;
+            } catch (...) {
+                error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur TSL2561."));
+                this->stopped = true;
+            }
+        }
+
+        sleep(1);
+    }
+}
+
 void MeasureModule::SHTC3_measure_clock()
 {
     while (true) {
@@ -309,6 +339,7 @@ MeasureModule::MeasureModule()
 {
     this->STC31_driver = STC31Driver();
     this->SHTC3_driver = SHTC3Driver();
+    this->TSL2561_driver = TSL2561_CalculateLux();
 
     reset();
 
@@ -321,8 +352,11 @@ MeasureModule::MeasureModule()
     thread t3(&MeasureModule::BME680_measure_clock, this);
     t3.detach();
 
-    thread t4(&MeasureModule::STC31_calibration_clock, this);
+    thread t4(&MeasureModule::TSL2561_measure_clock, this);
     t4.detach();
+
+    thread t5(&MeasureModule::STC31_calibration_clock, this);
+    t5.detach();
 }
 
 void MeasureModule::reset()
@@ -389,6 +423,15 @@ void MeasureModule::reset_function()
     }
 
     printf("SHTC3 sensor probing successful\n");
+
+    /* TSL2561 init */
+    TSL2561_driver.closeRegister();
+    error = TSL2561_driver.init();
+    if (error) {
+        error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur TSL2561. La fonction [init] a retourné le code d'erreur : " + to_string(error)));
+        this->initialising = false;
+        return;
+    }
 
     /* BME680 init */
     i2c_hal_free();
