@@ -106,6 +106,7 @@
 #define M8C 0x0000   // 0.000 * 2^LUX_SCALE
 class TSL2561_CalculateLux {
   public:
+    TSL2561_CalculateLux();
     signed long readVisibleLux();
     uint16_t readIRLuminosity();
     uint16_t readFSpecLuminosity();

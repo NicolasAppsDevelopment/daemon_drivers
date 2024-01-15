@@ -54,7 +54,7 @@ void TSL2561_CalculateLux::getLux(void) {
     ch1 = (CH1_HIGH << 8) | CH1_LOW;
 }
 uint8_t TSL2561_CalculateLux::init() {
-    uint8_t error;
+    uint8_t error = 0;
     i2c_device = open(I2C_DEVICE_PATH, O_RDWR);
     if (i2c_device < 0) {
         perror("Error opening I2C device file");
@@ -116,6 +116,11 @@ uint16_t TSL2561_CalculateLux::readFSpecLuminosity() { //read Full Spectrum chan
         return -1;  //ch0 out of range, but ch1 not. the lux is not valid in this situation.
     }
     return ch0;
+}
+
+TSL2561_CalculateLux::TSL2561_CalculateLux()
+{
+    this->i2c_device = -1;
 }
 
 signed long TSL2561_CalculateLux::readVisibleLux() {
