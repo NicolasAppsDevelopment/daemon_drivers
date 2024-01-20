@@ -49,14 +49,17 @@ void MeasureModule::LightSensor_measure_clock()
             try {
                 int16_t error = 0;
 
-                float lum;
-                lum = ((rand() % 4095) / 4095.0) * 100.0;
+                int16_t lum;
+                float luminosity;
 
+                error = light_sensor_driver.getLuminosity(&lum);
                 if (error) {
                     throw DriverError("Impossible de récupérer les données de mesure du capteur de lumière.");
-                } else {
-                    addLuminositySample(lum);
                 }
+
+                luminosity = ((float)lum / 716.0) * 100.0;
+                addLuminositySample(luminosity);
+
             } catch (const DriverError& e) {
                 error_array.push_front(e);
                 this->stopped = true;
@@ -373,6 +376,7 @@ MeasureModule::MeasureModule()
 
     this->STC31_driver = STC31Driver();
     this->SHTC3_driver = SHTC3Driver();
+    this->light_sensor_driver = GroveLightSensorDriver();
 
     reset();
 
@@ -472,6 +476,15 @@ void MeasureModule::reset_function()
     error = bme680_self_test();
     if (error) {
         error_array.push_front(DriverError("L'auto-test du capteur BME680 a échoué. La fonction [bme680_self_test] a retourné le code d'erreur : " + to_string(error)));
+        this->initialising = false;
+        return;
+    }
+
+    /* Grove Light Sensor v1.2 ADC init */
+    light_sensor_driver.sensirion_i2c_hal_free();
+    error = light_sensor_driver.sensirion_i2c_hal_init();
+    if (error) {
+        error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur de lumière. La fonction [sensirion_i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
         this->initialising = false;
         return;
     }

@@ -9,6 +9,7 @@
 
 #include "STC31-driver/stc31.h"
 #include "SHTC3-driver/shtc3.h"
+#include "LightSensor-driver/grovelightsensor.h"
 using namespace std;
 
 #define NB_TEMPERATURE_SENSOR 2
@@ -51,6 +52,7 @@ class MeasureModule
 
         STC31Driver STC31_driver;
         SHTC3Driver SHTC3_driver;
+        GroveLightSensorDriver light_sensor_driver;
 
     public:
         MeasureModule();
