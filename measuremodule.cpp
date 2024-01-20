@@ -24,7 +24,7 @@ void MeasureModule::BME680_measure_clock()
                 error = bme680_get_measure(&pressure);
                 if (error) {
                     if (error != 2) { // DO NOT THROW ERROR IF IT'S A NO NEW DATA ERROR
-                        throw DriverError("Impossible de récupérer les données de mesure du capteurs BME680. La fonction [bme680_get_measure] a retourné le code d'erreur : " + to_string(error));
+                        throw DriverError("Impossible de récupérer les données de mesure du capteur BME680. La fonction [bme680_get_measure] a retourné le code d'erreur : " + to_string(error));
                     }
                 } else {
                     addPressureSample(pressure);
@@ -81,7 +81,7 @@ void MeasureModule::O2_measure_clock()
                 o2 = (rand() / RAND_MAX) * 100.0;
 
                 if (error) {
-                    throw DriverError("Impossible de récupérer les données de mesure du capteur de lumière.");
+                    throw DriverError("Impossible de récupérer les données de mesure du capteur d'O2.");
                 } else {
                     addO2Sample(o2);
                 }
@@ -89,7 +89,7 @@ void MeasureModule::O2_measure_clock()
                 error_array.push_front(e);
                 this->stopped = true;
             } catch (...) {
-                error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur de lumière."));
+                error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur d'O2."));
                 this->stopped = true;
             }
         }
@@ -115,7 +115,7 @@ void MeasureModule::SHTC3_measure_clock()
                 //this->SHTC3_driver_mutex.unlock();
 
                 if (error) {
-                    throw DriverError("Impossible de récupérer les données de mesure du capteurs SHTC3. La fonction [shtc1_measure_blocking_read] a retourné le code d'erreur : " + to_string(error));
+                    throw DriverError("Impossible de récupérer les données de mesure du capteur SHTC3. La fonction [shtc1_measure_blocking_read] a retourné le code d'erreur : " + to_string(error));
                 }
 
                 humidity = (float)humid / 1000.0;
@@ -156,7 +156,7 @@ void MeasureModule::STC31_measure_clock()
                 this->STC31_driver_mutex.unlock();
 
                 if (error) {
-                    throw DriverError("Impossible de récupérer les données de mesure du capteurs STC31. La fonction [stc3x_measure_gas_concentration] a retourné le code d'erreur : " + to_string(error));
+                    throw DriverError("Impossible de récupérer les données de mesure du capteur STC31. La fonction [stc3x_measure_gas_concentration] a retourné le code d'erreur : " + to_string(error));
                 }
 
                 gas = 100 * ((float)gas_ticks - 16384.0) / 32768.0;
