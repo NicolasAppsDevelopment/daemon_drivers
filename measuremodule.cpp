@@ -50,7 +50,7 @@ void MeasureModule::LightSensor_measure_clock()
                 int16_t error = 0;
 
                 float lum;
-                lum = (rand() / RAND_MAX) * 100.0;
+                lum = ((rand() % 4095) / 4095.0) * 100.0;
 
                 if (error) {
                     throw DriverError("Impossible de récupérer les données de mesure du capteur de lumière.");
@@ -78,7 +78,7 @@ void MeasureModule::O2_measure_clock()
                 int16_t error = 0;
 
                 float o2;
-                o2 = (rand() / RAND_MAX) * 100.0;
+                o2 = ((rand() % 4095) / 4095.0) * 100.0;
 
                 if (error) {
                     throw DriverError("Impossible de récupérer les données de mesure du capteur d'O2.");
