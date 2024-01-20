@@ -9,7 +9,6 @@
 
 #include "STC31-driver/stc31.h"
 #include "SHTC3-driver/shtc3.h"
-#include "TSL2561-driver/Digital_Light_TSL2561.h"
 using namespace std;
 
 #define NB_TEMPERATURE_SENSOR 2
@@ -28,7 +27,8 @@ class MeasureModule
         void STC31_measure_clock();
         void SHTC3_measure_clock();
         void BME680_measure_clock();
-        void TSL2561_measure_clock();
+        void LightSensor_measure_clock();
+        void O2_measure_clock();
         void STC31_calibration_clock();
         void reset_function();
 
@@ -51,7 +51,6 @@ class MeasureModule
 
         STC31Driver STC31_driver;
         SHTC3Driver SHTC3_driver;
-        TSL2561_CalculateLux TSL2561_driver;
 
     public:
         MeasureModule();

@@ -13,7 +13,6 @@ SOURCES += \
         STC31-driver/stc31.cpp \
         Sensirion-driver-base/sensirion_common.c \
         Sensirion-driver-base/sensirion_driver.cpp \
-        TSL2561-driver/Digital_Light_TSL2561.cpp \
         drivererror.cpp \
         main.cpp \
         measuremodule.cpp \
@@ -28,7 +27,6 @@ HEADERS += \
     Sensirion-driver-base/sensirion_common.h \
     Sensirion-driver-base/sensirion_config.h \
     Sensirion-driver-base/sensirion_driver.h \
-    TSL2561-driver/Digital_Light_TSL2561.h \
     drivererror.h \
     measuremodule.h \
     sensormeasure.h
