@@ -151,7 +151,7 @@ void MeasureModule::STC31_measure_clock()
                 int16_t error = 0;
 
                 uint16_t gas_ticks;
-                uint16_t temperature_ticks;
+                int16_t temperature_ticks;
 
                 float gas;
                 float temperature;
