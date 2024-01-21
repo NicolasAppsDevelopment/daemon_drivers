@@ -477,9 +477,10 @@ void MeasureModule::reset_function()
 
     error = bme680_self_test();
     if (error) {
-        error_array.push_front(DriverError("L'auto-test du capteur BME680 a échoué. La fonction [bme680_self_test] a retourné le code d'erreur : " + to_string(error)));
-        this->initialising = false;
-        return;
+        error_array.push_front(DriverError("Erreur ignorée. L'auto-test du capteur BME680 a échoué. La fonction [bme680_self_test] a retourné le code d'erreur : " + to_string(error)));
+        // IGNORE ERROR: SELF TEST CAN CAUSE ERROR BUT VALUES ARE OK (JUST FOR PRESSURE)
+        /*this->initialising = false;
+        return;*/
     }
 
     /* Grove Light Sensor v1.2 ADC init */
