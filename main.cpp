@@ -87,8 +87,8 @@ string getSensorMeasure() {
     cout << " TEMP: " << data->getTemperature() << "°C" << endl;
     cout << " HUMID: " << data->getHumidity() << "%" << endl;
     cout << " PRESS: " << data->getPressure() << "Pa" << endl;
-    cout << " O2: " << data->getO2() << endl;
-    cout << " LUM: " << data->getLuminosity() << "" << endl;
+    cout << " O2: " << data->getO2() << "" << endl;
+    cout << " LUM: " << data->getLuminosity() << "%" << endl;
 
     delete data;
     return res;

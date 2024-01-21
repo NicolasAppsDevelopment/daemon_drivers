@@ -57,8 +57,8 @@ void MeasureModule::LightSensor_measure_clock()
                     throw DriverError("Impossible de récupérer les données de mesure du capteur de lumière.");
                 }
 
-                luminosity = ((float)lum / 716.0) * 100.0;
-                printf("Data received from light sensor: \t %f percent\n", luminosity);
+                luminosity = ((float)lum / 712.0) * 100.0;
+                printf("Data received from light sensor: \t %f %\n", luminosity);
 
                 addLuminositySample(luminosity);
 
