@@ -491,6 +491,13 @@ void MeasureModule::reset_function()
         return;
     }
 
+    error = light_sensor_driver.init_address();
+    if (error) {
+        error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur de lumière. La fonction [init_address] a retourné le code d'erreur : " + to_string(error)));
+        this->initialising = false;
+        return;
+    }
+
     this->stopped = false;
     this->initialising = false;
 }

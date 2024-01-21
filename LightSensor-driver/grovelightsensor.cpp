@@ -8,12 +8,7 @@
 #include <linux/i2c-dev.h>
 
 GroveLightSensorDriver::GroveLightSensorDriver() : SensirionDriver()
-{
-    // Set the I2C slave address
-    if (ioctl(i2c_device, I2C_SLAVE, GROVE_BASE_HAT_I2C_ADDRESS) < 0) {
-        perror("Unable to set I2C slave address for light sensor");
-    }
-}
+{}
 
 int16_t GroveLightSensorDriver::getLuminosity(int16_t* luminosity)
 {
@@ -37,6 +32,16 @@ int16_t GroveLightSensorDriver::getLuminosity(int16_t* luminosity)
     }
     *luminosity = buffer[0];
 
+    return 0;
+}
+
+int16_t GroveLightSensorDriver::init_address()
+{
+    // Set the I2C slave address
+    if (ioctl(i2c_device, I2C_SLAVE, GROVE_BASE_HAT_I2C_ADDRESS) < 0) {
+        perror("Unable to set I2C slave address for light sensor");
+        return -1;
+    }
     return 0;
 }
 

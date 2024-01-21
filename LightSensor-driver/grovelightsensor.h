@@ -14,6 +14,7 @@ class GroveLightSensorDriver : public SensirionDriver
 public:
     GroveLightSensorDriver();
     int16_t getLuminosity(int16_t *luminosity);
+    int16_t init_address();
 };
 
 #endif // GROVELIGHTSENSORDRIVER_H
