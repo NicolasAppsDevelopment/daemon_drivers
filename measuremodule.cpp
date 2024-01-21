@@ -58,6 +58,8 @@ void MeasureModule::LightSensor_measure_clock()
                 }
 
                 luminosity = ((float)lum / 716.0) * 100.0;
+                printf("Data received from light sensor: \t %f percent\n", luminosity);
+
                 addLuminositySample(luminosity);
 
             } catch (const DriverError& e) {
