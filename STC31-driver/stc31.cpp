@@ -70,7 +70,7 @@ int16_t STC31Driver::stc3x_set_pressure(uint16_t absolue_pressure) {
 }
 
 int16_t STC31Driver::stc3x_measure_gas_concentration(uint16_t* gas_ticks,
-                                        uint16_t* temperature_ticks) {
+                                        int16_t* temperature_ticks) {
     int16_t error;
     uint8_t buffer[6];
     uint16_t offset = 0;
@@ -88,7 +88,7 @@ int16_t STC31Driver::stc3x_measure_gas_concentration(uint16_t* gas_ticks,
         return error;
     }
     *gas_ticks = sensirion_common_bytes_to_uint16_t(&buffer[0]);
-    *temperature_ticks = sensirion_common_bytes_to_uint16_t(&buffer[2]);
+    *temperature_ticks = sensirion_common_bytes_to_int16_t(&buffer[2]);
     return NO_ERROR;
 }
 

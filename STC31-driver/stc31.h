@@ -102,7 +102,7 @@ public:
      * @return 0 on success, an error code otherwise
      */
     int16_t stc3x_measure_gas_concentration(uint16_t* gas_ticks,
-                                            uint16_t* temperature_ticks);
+                                            int16_t *temperature_ticks);
 
     /**
      * stc3x_forced_recalibration() - Forced recalibration (FRC) is used to improve
