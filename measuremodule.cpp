@@ -238,7 +238,7 @@ void MeasureModule::STC31_calibration_clock()
                         throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_pressure] a retourné le code d'erreur : " + to_string(error));
                     }
 
-                    uint16_t temp = temperature * 200;
+                    int16_t temp = temperature * 200;
 
                     this->STC31_driver_mutex.lock();
                     error = STC31_driver.stc3x_set_temperature(temp);
