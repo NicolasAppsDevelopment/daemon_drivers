@@ -10,7 +10,7 @@
  */
 
 #include "shtc3.h"
-#include "Sensirion-driver-base/sensirion_common.h"
+#include "../Sensirion-driver-base/sensirion_common.h"
 #include <iostream>
 
 using namespace std;
@@ -42,7 +42,7 @@ int16_t SHTC3Driver::shtc1_measure(void) {
 }
 
 int16_t SHTC3Driver::shtc1_read(int32_t* temperature, int32_t* humidity) {
-    uint16_t words[2];
+    UShort words[2];
     int16_t ret = sensirion_i2c_read_words(SHTC1_ADDRESS, words,
                                            SENSIRION_NUM_WORDS(words)); // SENSIRION_NUM_WORDS(words) = 2
     /**
@@ -58,7 +58,7 @@ int16_t SHTC3Driver::shtc1_read(int32_t* temperature, int32_t* humidity) {
 }
 
 int16_t SHTC3Driver::shtc1_probe(void) {
-    uint32_t serial;
+    UInt serial;
     int16_t ret;
 
     ret = shtc1_wake_up(); /* Try to wake up the sensor */
@@ -68,15 +68,15 @@ int16_t SHTC3Driver::shtc1_probe(void) {
     return shtc1_read_serial(&serial);
 }
 
-void SHTC3Driver::shtc1_enable_low_power_mode(uint8_t enable_low_power_mode) {
+void SHTC3Driver::shtc1_enable_low_power_mode(Byte enable_low_power_mode) {
     shtc1_cmd_measure =
         enable_low_power_mode ? SHTC1_CMD_MEASURE_LPM : SHTC1_CMD_MEASURE_HPM;
 }
 
-int16_t SHTC3Driver::shtc1_read_serial(uint32_t* serial) {
+int16_t SHTC3Driver::shtc1_read_serial(UInt* serial) {
     int16_t ret;
-    const uint16_t tx_words[] = {0x007B};
-    uint16_t serial_words[SENSIRION_NUM_WORDS(*serial)];
+    const UShort tx_words[] = {0x007B};
+    UShort serial_words[SENSIRION_NUM_WORDS(*serial)];
 
     ret = sensirion_i2c_write_cmd_with_args(SHTC1_ADDRESS, 0xC595, tx_words, SENSIRION_NUM_WORDS(tx_words));
     if (ret) {
@@ -98,11 +98,11 @@ int16_t SHTC3Driver::shtc1_read_serial(uint32_t* serial) {
         return ret;
     }
 
-    *serial = ((uint32_t)serial_words[0] << 16) | serial_words[1];
+    *serial = ((UInt)serial_words[0] << 16) | serial_words[1];
     return ret;
 }
 
-uint8_t SHTC3Driver::shtc1_get_configured_address(void) {
+Byte SHTC3Driver::shtc1_get_configured_address(void) {
     return SHTC1_ADDRESS;
 }
 

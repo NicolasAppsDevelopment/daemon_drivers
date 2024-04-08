@@ -33,10 +33,7 @@
 #define SENSIRION_COMMON_H
 
 #include "sensirion_config.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "../types.h"
 
 #define NO_ERROR 0
 #define NOT_IMPLEMENTED_ERROR 31
@@ -51,131 +48,134 @@ extern "C" {
 #define SENSIRION_MAX_BUFFER_WORDS 32
 
 /**
- * sensirion_common_bytes_to_int16_t() - Convert an array of bytes to an int16_t
- *
- * Convert an array of bytes received from the sensor in big-endian/MSB-first
- * format to an int16_t value in the correct system-endianness.
- *
- * @param bytes An array of at least two bytes (MSB first)
- * @return      The byte array represented as int16_t
- */
-int16_t sensirion_common_bytes_to_int16_t(const uint8_t* bytes);
+* SensirionCommon - Sensirion driver base class for data type convertion
+* @see https://github.com/Sensirion/raspberry-pi-i2c-stc3x 
+*/
+class SensirionCommon
+{
+    public:
+    /**
+    * sensirion_common_bytes_to_int16_t() - Convert an array of bytes to an int16_t
+    *
+    * Convert an array of bytes received from the sensor in big-endian/MSB-first
+    * format to an int16_t value in the correct system-endianness.
+    *
+    * @param bytes An array of at least two bytes (MSB first)
+    * @return      The byte array represented as int16_t
+    */
+    static int16_t sensirion_common_bytes_to_int16_t(const Byte* bytes);
 
-/**
- * sensirion_common_bytes_to_int32_t() - Convert an array of bytes to an int32_t
- *
- * Convert an array of bytes received from the sensor in big-endian/MSB-first
- * format to an int32_t value in the correct system-endianness.
- *
- * @param bytes An array of at least four bytes (MSB first)
- * @return      The byte array represented as int32_t
- */
-int32_t sensirion_common_bytes_to_int32_t(const uint8_t* bytes);
+    /**
+     * sensirion_common_bytes_to_int32_t() - Convert an array of bytes to an int32_t
+     *
+     * Convert an array of bytes received from the sensor in big-endian/MSB-first
+     * format to an int32_t value in the correct system-endianness.
+     *
+     * @param bytes An array of at least four bytes (MSB first)
+     * @return      The byte array represented as int32_t
+     */
+    static int32_t sensirion_common_bytes_to_int32_t(const Byte* bytes);
 
-/**
- * sensirion_common_bytes_to_uint16_t() - Convert an array of bytes to an
- * uint16_t
- *
- * Convert an array of bytes received from the sensor in big-endian/MSB-first
- * format to an uint16_t value in the correct system-endianness.
- *
- * @param bytes An array of at least two bytes (MSB first)
- * @return      The byte array represented as uint16_t
- */
-uint16_t sensirion_common_bytes_to_uint16_t(const uint8_t* bytes);
+    /**
+     * sensirion_common_bytes_to_UShort() - Convert an array of bytes to an
+     * UShort
+     *
+     * Convert an array of bytes received from the sensor in big-endian/MSB-first
+     * format to an UShort value in the correct system-endianness.
+     *
+     * @param bytes An array of at least two bytes (MSB first)
+     * @return      The byte array represented as UShort
+     */
+    static UShort sensirion_common_bytes_to_UShort(const Byte* bytes);
 
-/**
- * sensirion_common_bytes_to_uint32_t() - Convert an array of bytes to an
- * uint32_t
- *
- * Convert an array of bytes received from the sensor in big-endian/MSB-first
- * format to an uint32_t value in the correct system-endianness.
- *
- * @param bytes An array of at least four bytes (MSB first)
- * @return      The byte array represented as uint32_t
- */
-uint32_t sensirion_common_bytes_to_uint32_t(const uint8_t* bytes);
+    /**
+     * sensirion_common_bytes_to_UInt() - Convert an array of bytes to an
+     * UInt
+     *
+     * Convert an array of bytes received from the sensor in big-endian/MSB-first
+     * format to an UInt value in the correct system-endianness.
+     *
+     * @param bytes An array of at least four bytes (MSB first)
+     * @return      The byte array represented as UInt
+     */
+    static UInt sensirion_common_bytes_to_UInt(const Byte* bytes);
 
-/**
- * sensirion_common_bytes_to_float() - Convert an array of bytes to a float
- *
- * Convert an array of bytes received from the sensor in big-endian/MSB-first
- * format to an float value in the correct system-endianness.
- *
- * @param bytes An array of at least four bytes (MSB first)
- * @return      The byte array represented as float
- */
-float sensirion_common_bytes_to_float(const uint8_t* bytes);
+    /**
+     * sensirion_common_bytes_to_float() - Convert an array of bytes to a float
+     *
+     * Convert an array of bytes received from the sensor in big-endian/MSB-first
+     * format to an float value in the correct system-endianness.
+     *
+     * @param bytes An array of at least four bytes (MSB first)
+     * @return      The byte array represented as float
+     */
+    static float sensirion_common_bytes_to_float(const Byte* bytes);
 
-/**
- * sensirion_common_uint32_t_to_bytes() - Convert an uint32_t to an array of
- * bytes
- *
- * Convert an uint32_t value in system-endianness to big-endian/MBS-first
- * format to send to the sensor.
- *
- * @param value Value to convert
- * @param bytes An array of at least four bytes
- */
-void sensirion_common_uint32_t_to_bytes(const uint32_t value, uint8_t* bytes);
+    /**
+     * sensirion_common_UInt_to_bytes() - Convert an UInt to an array of
+     * bytes
+     *
+     * Convert an UInt value in system-endianness to big-endian/MBS-first
+     * format to send to the sensor.
+     *
+     * @param value Value to convert
+     * @param bytes An array of at least four bytes
+     */
+    static void sensirion_common_UInt_to_bytes(const UInt value, Byte* bytes);
 
-/**
- * sensirion_common_uint16_t_to_bytes() - Convert an uint16_t to an array of
- * bytes
- *
- * Convert an uint16_t value in system-endianness to big-endian/MBS-first
- * format to send to the sensor.
- *
- * @param value Value to convert
- * @param bytes An array of at least two bytes
- */
-void sensirion_common_uint16_t_to_bytes(const uint16_t value, uint8_t* bytes);
+    /**
+     * sensirion_common_UShort_to_bytes() - Convert an UShort to an array of
+     * bytes
+     *
+     * Convert an UShort value in system-endianness to big-endian/MBS-first
+     * format to send to the sensor.
+     *
+     * @param value Value to convert
+     * @param bytes An array of at least two bytes
+     */
+    static void sensirion_common_UShort_to_bytes(const UShort value, Byte* bytes);
 
-/**
- * sensirion_common_int32_t_to_bytes() - Convert an int32_t to an array of bytes
- *
- * Convert an int32_t value in system-endianness to big-endian/MBS-first
- * format to send to the sensor.
- *
- * @param value Value to convert
- * @param bytes An array of at least four bytes
- */
-void sensirion_common_int32_t_to_bytes(const int32_t value, uint8_t* bytes);
+    /**
+     * sensirion_common_int32_t_to_bytes() - Convert an int32_t to an array of bytes
+     *
+     * Convert an int32_t value in system-endianness to big-endian/MBS-first
+     * format to send to the sensor.
+     *
+     * @param value Value to convert
+     * @param bytes An array of at least four bytes
+     */
+    static void sensirion_common_int32_t_to_bytes(const int32_t value, Byte* bytes);
 
-/**
- * sensirion_common_int16_t_to_bytes() - Convert an int16_t to an array of bytes
- *
- * Convert an int16_t value in system-endianness to big-endian/MBS-first
- * format to send to the sensor.
- *
- * @param value Value to convert
- * @param bytes An array of at least two bytes
- */
-void sensirion_common_int16_t_to_bytes(const int16_t value, uint8_t* bytes);
+    /**
+     * sensirion_common_int16_t_to_bytes() - Convert an int16_t to an array of bytes
+     *
+     * Convert an int16_t value in system-endianness to big-endian/MBS-first
+     * format to send to the sensor.
+     *
+     * @param value Value to convert
+     * @param bytes An array of at least two bytes
+     */
+    static void sensirion_common_int16_t_to_bytes(const int16_t value, Byte* bytes);
 
-/**
- * sensirion_common_float_to_bytes() - Convert an float to an array of bytes
- *
- * Convert an float value in system-endianness to big-endian/MBS-first
- * format to send to the sensor.
- *
- * @param value Value to convert
- * @param bytes An array of at least four bytes
- */
-void sensirion_common_float_to_bytes(const float value, uint8_t* bytes);
+    /**
+     * sensirion_common_float_to_bytes() - Convert an float to an array of bytes
+     *
+     * Convert an float value in system-endianness to big-endian/MBS-first
+     * format to send to the sensor.
+     *
+     * @param value Value to convert
+     * @param bytes An array of at least four bytes
+     */
+    static void sensirion_common_float_to_bytes(const float value, Byte* bytes);
 
-/**
- * sensirion_common_copy_bytes() - Copy bytes from one array to the other.
- *
- * @param source      Array of bytes to be copied.
- * @param destination Array of bytes to be copied to.
- * @param data_length Number of bytes to copy.
- */
-void sensirion_common_copy_bytes(const uint8_t* source, uint8_t* destination,
-                                 uint16_t data_length);
-
-#ifdef __cplusplus
-}
-#endif
-
+    /**
+     * sensirion_common_copy_bytes() - Copy bytes from one array to the other.
+     *
+     * @param source      Array of bytes to be copied.
+     * @param destination Array of bytes to be copied to.
+     * @param data_length Number of bytes to copy.
+     */
+    static void sensirion_common_copy_bytes(const Byte* source, Byte* destination,
+        UShort data_length);
+};
 #endif /* SENSIRION_COMMON_H */

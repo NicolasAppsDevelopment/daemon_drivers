@@ -1,11 +1,16 @@
 #ifndef STC31_H
 #define STC31_H
 
-#include "Sensirion-driver-base/sensirion_config.h"
-#include "Sensirion-driver-base/sensirion_driver.h"
+#include "../Sensirion-driver-base/sensirion_config.h"
+#include "../Sensirion-driver-base/sensirion_driver.h"
+#include "../types.h"
 
 #define STC3X_I2C_ADDRESS 0x29
 
+/**
+* STC31Driver - STC31 driver class
+* @see https://github.com/Sensirion/raspberry-pi-i2c-stc3x 
+*/
 class STC31Driver : public SensirionDriver {
 public:
     STC31Driver();
@@ -29,7 +34,7 @@ public:
      *
      * @return 0 on success, an error code otherwise
      */
-    int16_t stc3x_set_binary_gas(uint16_t binary_gas);
+    int16_t stc3x_set_binary_gas(UShort binary_gas);
 
     /**
      * stc3x_set_relative_humidity() - As mentioned in section 5.1 of the datasheet,
@@ -44,7 +49,7 @@ public:
      *
      * @return 0 on success, an error code otherwise
      */
-    int16_t stc3x_set_relative_humidity(uint16_t relative_humidity_ticks);
+    int16_t stc3x_set_relative_humidity(UShort relative_humidity_ticks);
 
     /**
      * stc3x_set_temperature() - The concentration measurement requires a
@@ -59,7 +64,7 @@ public:
      *
      * @return 0 on success, an error code otherwise
      */
-    int16_t stc3x_set_temperature(uint16_t temperature_ticks);
+    int16_t stc3x_set_temperature(UShort temperature_ticks);
 
     /**
      * stc3x_set_pressure() - A pressure value can be written into the sensor, for
@@ -73,7 +78,7 @@ public:
      *
      * @return 0 on success, an error code otherwise
      */
-    int16_t stc3x_set_pressure(uint16_t absolue_pressure);
+    int16_t stc3x_set_pressure(UShort absolue_pressure);
 
     /**
      * stc3x_measure_gas_concentration() - The measurement of gas concentration is
@@ -101,7 +106,7 @@ public:
      *
      * @return 0 on success, an error code otherwise
      */
-    int16_t stc3x_measure_gas_concentration(uint16_t* gas_ticks,
+    int16_t stc3x_measure_gas_concentration(UShort* gas_ticks,
                                             int16_t *temperature_ticks);
 
     /**
@@ -116,7 +121,7 @@ public:
      *
      * @return 0 on success, an error code otherwise
      */
-    int16_t stc3x_forced_recalibration(uint16_t reference_concentration);
+    int16_t stc3x_forced_recalibration(UShort reference_concentration);
 
     /**
      * stc3x_enable_automatic_self_calibration() - Enable the automatic
@@ -169,7 +174,7 @@ public:
      *
      * @return 0 on success, an error code otherwise
      */
-    int16_t stc3x_set_sensor_state(const uint8_t* state, uint8_t state_size);
+    int16_t stc3x_set_sensor_state(const Byte* state, Byte state_size);
 
     /**
      * stc3x_get_sensor_state() - Read out the sensor state.
@@ -178,7 +183,7 @@ public:
      *
      * @return 0 on success, an error code otherwise
      */
-    int16_t stc3x_get_sensor_state(uint8_t* state, uint8_t state_size);
+    int16_t stc3x_get_sensor_state(Byte* state, Byte state_size);
 
     /**
      * stc3x_apply_state() - The sensor will apply the written state data.
@@ -201,7 +206,7 @@ public:
      *
      * @return 0 on success, an error code otherwise
      */
-    int16_t stc3x_self_test(uint16_t* self_test_output);
+    int16_t stc3x_self_test(UShort* self_test_output);
 
     /**
      * stc3x_enter_sleep_mode() - Put sensor into sleep mode.
@@ -243,9 +248,9 @@ public:
      *
      * @return 0 on success, an error code otherwise
      */
-    int16_t stc3x_read_product_identifier(uint32_t* product_number,
-                                          uint8_t* serial_number,
-                                          uint8_t serial_number_size);
+    int16_t stc3x_read_product_identifier(UInt* product_number,
+                                          Byte* serial_number,
+                                          Byte serial_number_size);
 
 };
 

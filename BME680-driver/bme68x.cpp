@@ -46,58 +46,58 @@ static int8_t get_calib_data(struct bme68x_dev *dev);
 static int8_t read_variant_id(struct bme68x_dev *dev);
 
 /* This internal API is used to calculate the gas wait */
-static uint8_t calc_gas_wait(uint16_t dur);
+static Byte calc_gas_wait(UShort dur);
 
 #ifndef BME68X_USE_FPU
 
 /* This internal API is used to calculate the temperature in integer */
-static int16_t calc_temperature(uint32_t temp_adc, struct bme68x_dev *dev);
+static int16_t calc_temperature(UInt temp_adc, struct bme68x_dev *dev);
 
 /* This internal API is used to calculate the pressure in integer */
-static uint32_t calc_pressure(uint32_t pres_adc, const struct bme68x_dev *dev);
+static UInt calc_pressure(UInt pres_adc, const struct bme68x_dev *dev);
 
 /* This internal API is used to calculate the humidity in integer */
-static uint32_t calc_humidity(uint16_t hum_adc, const struct bme68x_dev *dev);
+static UInt calc_humidity(UShort hum_adc, const struct bme68x_dev *dev);
 
 /* This internal API is used to calculate the gas resistance high */
-static uint32_t calc_gas_resistance_high(uint16_t gas_res_adc, uint8_t gas_range);
+static UInt calc_gas_resistance_high(UShort gas_res_adc, Byte gas_range);
 
 /* This internal API is used to calculate the gas resistance low */
-static uint32_t calc_gas_resistance_low(uint16_t gas_res_adc, uint8_t gas_range, const struct bme68x_dev *dev);
+static UInt calc_gas_resistance_low(UShort gas_res_adc, Byte gas_range, const struct bme68x_dev *dev);
 
 /* This internal API is used to calculate the heater resistance using integer */
-static uint8_t calc_res_heat(uint16_t temp, const struct bme68x_dev *dev);
+static Byte calc_res_heat(UShort temp, const struct bme68x_dev *dev);
 
 #else
 
 /* This internal API is used to calculate the temperature value in float */
-static float calc_temperature(uint32_t temp_adc, struct bme68x_dev *dev);
+static float calc_temperature(UInt temp_adc, struct bme68x_dev *dev);
 
 /* This internal API is used to calculate the pressure value in float */
-static float calc_pressure(uint32_t pres_adc, const struct bme68x_dev *dev);
+static float calc_pressure(UInt pres_adc, const struct bme68x_dev *dev);
 
 /* This internal API is used to calculate the humidity value in float */
-static float calc_humidity(uint16_t hum_adc, const struct bme68x_dev *dev);
+static float calc_humidity(UShort hum_adc, const struct bme68x_dev *dev);
 
 /* This internal API is used to calculate the gas resistance high value in float */
-static float calc_gas_resistance_high(uint16_t gas_res_adc, uint8_t gas_range);
+static float calc_gas_resistance_high(UShort gas_res_adc, Byte gas_range);
 
 /* This internal API is used to calculate the gas resistance low value in float */
-static float calc_gas_resistance_low(uint16_t gas_res_adc, uint8_t gas_range, const struct bme68x_dev *dev);
+static float calc_gas_resistance_low(UShort gas_res_adc, Byte gas_range, const struct bme68x_dev *dev);
 
 /* This internal API is used to calculate the heater resistance value using float */
-static uint8_t calc_res_heat(uint16_t temp, const struct bme68x_dev *dev);
+static Byte calc_res_heat(UShort temp, const struct bme68x_dev *dev);
 
 #endif
 
 /* This internal API is used to read a single data of the sensor */
-static int8_t read_field_data(uint8_t index, struct bme68x_data *data, struct bme68x_dev *dev);
+static int8_t read_field_data(Byte index, struct bme68x_data *data, struct bme68x_dev *dev);
 
 /* This internal API is used to read all data fields of the sensor */
 static int8_t read_all_field_data(struct bme68x_data * const data[], struct bme68x_dev *dev);
 
 /* This internal API is used to switch between SPI memory pages */
-static int8_t set_mem_page(uint8_t reg_addr, struct bme68x_dev *dev);
+static int8_t set_mem_page(Byte reg_addr, struct bme68x_dev *dev);
 
 /* This internal API is used to get the current SPI memory page */
 static int8_t get_mem_page(struct bme68x_dev *dev);
@@ -106,20 +106,20 @@ static int8_t get_mem_page(struct bme68x_dev *dev);
 static int8_t null_ptr_check(const struct bme68x_dev *dev);
 
 /* This internal API is used to set heater configurations */
-static int8_t set_conf(const struct bme68x_heatr_conf *conf, uint8_t op_mode, uint8_t *nb_conv, struct bme68x_dev *dev);
+static int8_t set_conf(const struct bme68x_heatr_conf *conf, Byte op_mode, Byte *nb_conv, struct bme68x_dev *dev);
 
 /* This internal API is used to limit the max value of a parameter */
-static int8_t boundary_check(uint8_t *value, uint8_t max, struct bme68x_dev *dev);
+static int8_t boundary_check(Byte *value, Byte max, struct bme68x_dev *dev);
 
 /* This internal API is used to calculate the register value for
  * shared heater duration */
-static uint8_t calc_heatr_dur_shared(uint16_t dur);
+static Byte calc_heatr_dur_shared(UShort dur);
 
 /* This internal API is used to swap two fields */
-static void swap_fields(uint8_t index1, uint8_t index2, struct bme68x_data *field[]);
+static void swap_fields(Byte index1, Byte index2, struct bme68x_data *field[]);
 
 /* This internal API is used sort the sensor data */
-static void sort_sensor_data(uint8_t low_index, uint8_t high_index, struct bme68x_data *field[]);
+static void sort_sensor_data(Byte low_index, Byte high_index, struct bme68x_data *field[]);
 
 /*
  * @brief       Function to analyze the sensor data
@@ -131,7 +131,7 @@ static void sort_sensor_data(uint8_t low_index, uint8_t high_index, struct bme68
  * @retval 0 -> Success
  * @retval < 0 -> Fail
  */
-static int8_t analyze_sensor_data(const struct bme68x_data *data, uint8_t n_meas);
+static int8_t analyze_sensor_data(const struct bme68x_data *data, Byte n_meas);
 
 /******************************************************************************************/
 /*                                 Global API definitions                                 */
@@ -141,7 +141,7 @@ static int8_t analyze_sensor_data(const struct bme68x_data *data, uint8_t n_meas
 * verify the sensor and also calibrates the sensor
 * As this API is the entry point, call this API before using other APIs.
 */
-int8_t bme68x_init(struct bme68x_dev *dev)
+int8_t BME68X::bme68x_init(struct bme68x_dev *dev)
 {
     int8_t rslt;
 
@@ -174,13 +174,13 @@ int8_t bme68x_init(struct bme68x_dev *dev)
 /*
  * @brief This API writes the given data to the register address of the sensor
  */
-int8_t bme68x_set_regs(const uint8_t *reg_addr, const uint8_t *reg_data, uint32_t len, struct bme68x_dev *dev)
+int8_t BME68X::bme68x_set_regs(const Byte *reg_addr, const Byte *reg_data, UInt len, struct bme68x_dev *dev)
 {
     int8_t rslt;
 
     /* Length of the temporary buffer is 2*(length of register)*/
-    uint8_t tmp_buff[BME68X_LEN_INTERLEAVE_BUFF] = { 0 };
-    uint16_t index;
+    Byte tmp_buff[BME68X_LEN_INTERLEAVE_BUFF] = { 0 };
+    UShort index;
 
     /* Check for null pointer in the device structure*/
     rslt = null_ptr_check(dev);
@@ -231,7 +231,7 @@ int8_t bme68x_set_regs(const uint8_t *reg_addr, const uint8_t *reg_data, uint32_
 /*
  * @brief This API reads the data from the given register address of sensor.
  */
-int8_t bme68x_get_regs(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, struct bme68x_dev *dev)
+int8_t BME68X::bme68x_get_regs(Byte reg_addr, Byte *reg_data, UInt len, struct bme68x_dev *dev)
 {
     int8_t rslt;
 
@@ -256,13 +256,13 @@ int8_t bme68x_get_regs(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, struct
 /*
  * @brief This API soft-resets the sensor.
  */
-int8_t bme68x_soft_reset(struct bme68x_dev *dev)
+int8_t BME68X::bme68x_soft_reset(struct bme68x_dev *dev)
 {
     int8_t rslt;
-    uint8_t reg_addr = BME68X_REG_SOFT_RESET;
+    Byte reg_addr = BME68X_REG_SOFT_RESET;
 
     /* 0xb6 is the soft reset command */
-    uint8_t soft_rst_cmd = BME68X_SOFT_RESET_CMD;
+    Byte soft_rst_cmd = BME68X_SOFT_RESET_CMD;
 
     /* Check for null pointer in the device structure*/
     rslt = null_ptr_check(dev);
@@ -298,15 +298,15 @@ int8_t bme68x_soft_reset(struct bme68x_dev *dev)
 /*
  * @brief This API is used to set the oversampling, filter and odr configuration
  */
-int8_t bme68x_set_conf(struct bme68x_conf *conf, struct bme68x_dev *dev)
+int8_t BME68X::bme68x_set_conf(struct bme68x_conf *conf, struct bme68x_dev *dev)
 {
     int8_t rslt;
-    uint8_t odr20 = 0, odr3 = 1;
-    uint8_t current_op_mode;
+    Byte odr20 = 0, odr3 = 1;
+    Byte current_op_mode;
 
     /* Register data starting from BME68X_REG_CTRL_GAS_1(0x71) up to BME68X_REG_CONFIG(0x75) */
-    uint8_t reg_array[BME68X_LEN_CONFIG] = { 0x71, 0x72, 0x73, 0x74, 0x75 };
-    uint8_t data_array[BME68X_LEN_CONFIG] = { 0 };
+    Byte reg_array[BME68X_LEN_CONFIG] = { 0x71, 0x72, 0x73, 0x74, 0x75 };
+    Byte data_array[BME68X_LEN_CONFIG] = { 0 };
 
     rslt = bme68x_get_op_mode(&current_op_mode, dev);
     if (rslt == BME68X_OK)
@@ -382,13 +382,13 @@ int8_t bme68x_set_conf(struct bme68x_conf *conf, struct bme68x_dev *dev)
 /*
  * @brief This API is used to get the oversampling, filter and odr
  */
-int8_t bme68x_get_conf(struct bme68x_conf *conf, struct bme68x_dev *dev)
+int8_t BME68X::bme68x_get_conf(struct bme68x_conf *conf, struct bme68x_dev *dev)
 {
     int8_t rslt;
 
     /* starting address of the register array for burst read*/
-    uint8_t reg_addr = BME68X_REG_CTRL_GAS_1;
-    uint8_t data_array[BME68X_LEN_CONFIG];
+    Byte reg_addr = BME68X_REG_CTRL_GAS_1;
+    Byte data_array[BME68X_LEN_CONFIG];
 
     rslt = bme68x_get_regs(reg_addr, data_array, 5, dev);
     if (!conf)
@@ -417,12 +417,12 @@ int8_t bme68x_get_conf(struct bme68x_conf *conf, struct bme68x_dev *dev)
 /*
  * @brief This API is used to set the operation mode of the sensor
  */
-int8_t bme68x_set_op_mode(const uint8_t op_mode, struct bme68x_dev *dev)
+int8_t BME68X::bme68x_set_op_mode(const Byte op_mode, struct bme68x_dev *dev)
 {
     int8_t rslt;
-    uint8_t tmp_pow_mode;
-    uint8_t pow_mode = 0;
-    uint8_t reg_addr = BME68X_REG_CTRL_MEAS;
+    Byte tmp_pow_mode;
+    Byte pow_mode = 0;
+    Byte reg_addr = BME68X_REG_CTRL_MEAS;
 
     /* Call until in sleep */
     do
@@ -454,10 +454,10 @@ int8_t bme68x_set_op_mode(const uint8_t op_mode, struct bme68x_dev *dev)
 /*
  * @brief This API is used to get the operation mode of the sensor.
  */
-int8_t bme68x_get_op_mode(uint8_t *op_mode, struct bme68x_dev *dev)
+int8_t BME68X::bme68x_get_op_mode(Byte *op_mode, struct bme68x_dev *dev)
 {
     int8_t rslt;
-    uint8_t mode;
+    Byte mode;
 
     if (op_mode)
     {
@@ -477,12 +477,12 @@ int8_t bme68x_get_op_mode(uint8_t *op_mode, struct bme68x_dev *dev)
 /*
  * @brief This API is used to get the remaining duration that can be used for heating.
  */
-uint32_t bme68x_get_meas_dur(const uint8_t op_mode, struct bme68x_conf *conf, struct bme68x_dev *dev)
+UInt BME68X::bme68x_get_meas_dur(const Byte op_mode, struct bme68x_conf *conf, struct bme68x_dev *dev)
 {
     int8_t rslt;
-    uint32_t meas_dur = 0; /* Calculate in us */
-    uint32_t meas_cycles;
-    uint8_t os_to_meas_cycles[6] = { 0, 1, 2, 4, 8, 16 };
+    UInt meas_dur = 0; /* Calculate in us */
+    UInt meas_cycles;
+    Byte os_to_meas_cycles[6] = { 0, 1, 2, 4, 8, 16 };
 
     if (conf != NULL)
     {
@@ -527,10 +527,10 @@ uint32_t bme68x_get_meas_dur(const uint8_t op_mode, struct bme68x_conf *conf, st
  * from the sensor, compensates the data and store it in the bme68x_data
  * structure instance passed by the user.
  */
-int8_t bme68x_get_data(uint8_t op_mode, struct bme68x_data *data, uint8_t *n_data, struct bme68x_dev *dev)
+int8_t BME68X::bme68x_get_data(Byte op_mode, struct bme68x_data *data, Byte *n_data, struct bme68x_dev *dev)
 {
     int8_t rslt;
-    uint8_t i = 0, j = 0, new_fields = 0;
+    Byte i = 0, j = 0, new_fields = 0;
     struct bme68x_data *field_ptr[3] = { 0 };
     struct bme68x_data field_data[3] = { { 0 } };
 
@@ -617,13 +617,13 @@ int8_t bme68x_get_data(uint8_t op_mode, struct bme68x_data *data, uint8_t *n_dat
 /*
  * @brief This API is used to set the gas configuration of the sensor.
  */
-int8_t bme68x_set_heatr_conf(uint8_t op_mode, const struct bme68x_heatr_conf *conf, struct bme68x_dev *dev)
+int8_t BME68X::bme68x_set_heatr_conf(Byte op_mode, const struct bme68x_heatr_conf *conf, struct bme68x_dev *dev)
 {
     int8_t rslt;
-    uint8_t nb_conv = 0;
-    uint8_t hctrl, run_gas = 0;
-    uint8_t ctrl_gas_data[2];
-    uint8_t ctrl_gas_addr[2] = { BME68X_REG_CTRL_GAS_0, BME68X_REG_CTRL_GAS_1 };
+    Byte nb_conv = 0;
+    Byte hctrl, run_gas = 0;
+    Byte ctrl_gas_data[2];
+    Byte ctrl_gas_addr[2] = { BME68X_REG_CTRL_GAS_0, BME68X_REG_CTRL_GAS_1 };
 
     if (conf != NULL)
     {
@@ -674,11 +674,11 @@ int8_t bme68x_set_heatr_conf(uint8_t op_mode, const struct bme68x_heatr_conf *co
 /*!
  * @brief This API is used to get the gas configuration of the sensor.
  */
-int8_t bme68x_get_heatr_conf(const struct bme68x_heatr_conf *conf, struct bme68x_dev *dev)
+int8_t BME68X::bme68x_get_heatr_conf(const struct bme68x_heatr_conf *conf, struct bme68x_dev *dev)
 {
     int8_t rslt = BME68X_OK;
-    uint8_t data_array[10] = { 0 };
-    uint8_t i;
+    Byte data_array[10] = { 0 };
+    Byte i;
 
     if ((conf != NULL) && (conf->heatr_dur_prof != NULL) && (conf->heatr_temp_prof != NULL))
     {
@@ -714,11 +714,11 @@ int8_t bme68x_get_heatr_conf(const struct bme68x_heatr_conf *conf, struct bme68x
 /*
  * @brief This API performs Self-test of low and high gas variants of BME68X
  */
-int8_t bme68x_selftest_check(const struct bme68x_dev *dev)
+int8_t BME68X::bme68x_selftest_check(const struct bme68x_dev *dev)
 {
     int8_t rslt;
-    uint8_t n_fields;
-    uint8_t i = 0;
+    Byte n_fields;
+    Byte i = 0;
     struct bme68x_data data[BME68X_N_MEAS] = { { 0 } };
     struct bme68x_dev t_dev;
     struct bme68x_conf conf;
@@ -822,7 +822,7 @@ int8_t bme68x_selftest_check(const struct bme68x_dev *dev)
 #ifndef BME68X_USE_FPU
 
 /* @brief This internal API is used to calculate the temperature value. */
-static int16_t calc_temperature(uint32_t temp_adc, struct bme68x_dev *dev)
+static int16_t calc_temperature(UInt temp_adc, struct bme68x_dev *dev)
 {
     int64_t var1;
     int64_t var2;
@@ -842,7 +842,7 @@ static int16_t calc_temperature(uint32_t temp_adc, struct bme68x_dev *dev)
 }
 
 /* @brief This internal API is used to calculate the pressure value. */
-static uint32_t calc_pressure(uint32_t pres_adc, const struct bme68x_dev *dev)
+static UInt calc_pressure(UInt pres_adc, const struct bme68x_dev *dev)
 {
     int32_t var1;
     int32_t var2;
@@ -866,7 +866,7 @@ static uint32_t calc_pressure(uint32_t pres_adc, const struct bme68x_dev *dev)
     var1 = var1 >> 18;
     var1 = ((32768 + var1) * (int32_t)dev->calib.par_p1) >> 15;
     pressure_comp = 1048576 - pres_adc;
-    pressure_comp = (int32_t)((pressure_comp - (var2 >> 12)) * ((uint32_t)3125));
+    pressure_comp = (int32_t)((pressure_comp - (var2 >> 12)) * ((UInt)3125));
     if (pressure_comp >= pres_ovf_check)
     {
         pressure_comp = ((pressure_comp / var1) << 1);
@@ -884,11 +884,11 @@ static uint32_t calc_pressure(uint32_t pres_adc, const struct bme68x_dev *dev)
     pressure_comp = (int32_t)(pressure_comp) + ((var1 + var2 + var3 + ((int32_t)dev->calib.par_p7 << 7)) >> 4);
 
     /*lint -restore */
-    return (uint32_t)pressure_comp;
+    return (UInt)pressure_comp;
 }
 
 /* This internal API is used to calculate the humidity in integer */
-static uint32_t calc_humidity(uint16_t hum_adc, const struct bme68x_dev *dev)
+static UInt calc_humidity(UShort hum_adc, const struct bme68x_dev *dev)
 {
     int32_t var1;
     int32_t var2;
@@ -924,23 +924,23 @@ static uint32_t calc_humidity(uint16_t hum_adc, const struct bme68x_dev *dev)
     }
 
     /*lint -restore */
-    return (uint32_t)calc_hum;
+    return (UInt)calc_hum;
 }
 
 /* This internal API is used to calculate the gas resistance low */
-static uint32_t calc_gas_resistance_low(uint16_t gas_res_adc, uint8_t gas_range, const struct bme68x_dev *dev)
+static UInt calc_gas_resistance_low(UShort gas_res_adc, Byte gas_range, const struct bme68x_dev *dev)
 {
     int64_t var1;
     uint64_t var2;
     int64_t var3;
-    uint32_t calc_gas_res;
-    uint32_t lookup_table1[16] = {
+    UInt calc_gas_res;
+    UInt lookup_table1[16] = {
         UINT32_C(2147483647), UINT32_C(2147483647), UINT32_C(2147483647), UINT32_C(2147483647), UINT32_C(2147483647),
         UINT32_C(2126008810), UINT32_C(2147483647), UINT32_C(2130303777), UINT32_C(2147483647), UINT32_C(2147483647),
         UINT32_C(2143188679), UINT32_C(2136746228), UINT32_C(2147483647), UINT32_C(2126008810), UINT32_C(2147483647),
         UINT32_C(2147483647)
     };
-    uint32_t lookup_table2[16] = {
+    UInt lookup_table2[16] = {
         UINT32_C(4096000000), UINT32_C(2048000000), UINT32_C(1024000000), UINT32_C(512000000), UINT32_C(255744255),
         UINT32_C(127110228), UINT32_C(64000000), UINT32_C(32258064), UINT32_C(16016016), UINT32_C(8000000), UINT32_C(
             4000000), UINT32_C(2000000), UINT32_C(1000000), UINT32_C(500000), UINT32_C(250000), UINT32_C(125000)
@@ -950,33 +950,33 @@ static uint32_t calc_gas_resistance_low(uint16_t gas_res_adc, uint8_t gas_range,
     var1 = (int64_t)((1340 + (5 * (int64_t)dev->calib.range_sw_err)) * ((int64_t)lookup_table1[gas_range])) >> 16;
     var2 = (((int64_t)((int64_t)gas_res_adc << 15) - (int64_t)(16777216)) + var1);
     var3 = (((int64_t)lookup_table2[gas_range] * (int64_t)var1) >> 9);
-    calc_gas_res = (uint32_t)((var3 + ((int64_t)var2 >> 1)) / (int64_t)var2);
+    calc_gas_res = (UInt)((var3 + ((int64_t)var2 >> 1)) / (int64_t)var2);
 
     /*lint -restore */
     return calc_gas_res;
 }
 
 /* This internal API is used to calculate the gas resistance */
-static uint32_t calc_gas_resistance_high(uint16_t gas_res_adc, uint8_t gas_range)
+static UInt calc_gas_resistance_high(UShort gas_res_adc, Byte gas_range)
 {
-    uint32_t calc_gas_res;
-    uint32_t var1 = UINT32_C(262144) >> gas_range;
+    UInt calc_gas_res;
+    UInt var1 = UINT32_C(262144) >> gas_range;
     int32_t var2 = (int32_t)gas_res_adc - INT32_C(512);
 
     var2 *= INT32_C(3);
     var2 = INT32_C(4096) + var2;
 
     /* multiplying 10000 then dividing then multiplying by 100 instead of multiplying by 1000000 to prevent overflow */
-    calc_gas_res = (UINT32_C(10000) * var1) / (uint32_t)var2;
+    calc_gas_res = (UINT32_C(10000) * var1) / (UInt)var2;
     calc_gas_res = calc_gas_res * 100;
 
     return calc_gas_res;
 }
 
 /* This internal API is used to calculate the heater resistance value using integer */
-static uint8_t calc_res_heat(uint16_t temp, const struct bme68x_dev *dev)
+static Byte calc_res_heat(UShort temp, const struct bme68x_dev *dev)
 {
-    uint8_t heatr_res;
+    Byte heatr_res;
     int32_t var1;
     int32_t var2;
     int32_t var3;
@@ -995,7 +995,7 @@ static uint8_t calc_res_heat(uint16_t temp, const struct bme68x_dev *dev)
     var4 = (var3 / (dev->calib.res_heat_range + 4));
     var5 = (131 * dev->calib.res_heat_val) + 65536;
     heatr_res_x100 = (int32_t)(((var4 / var5) - 250) * 34);
-    heatr_res = (uint8_t)((heatr_res_x100 + 50) / 100);
+    heatr_res = (Byte)((heatr_res_x100 + 50) / 100);
 
     return heatr_res;
 }
@@ -1003,7 +1003,7 @@ static uint8_t calc_res_heat(uint16_t temp, const struct bme68x_dev *dev)
 #else
 
 /* @brief This internal API is used to calculate the temperature value. */
-static float calc_temperature(uint32_t temp_adc, struct bme68x_dev *dev)
+static float calc_temperature(UInt temp_adc, struct bme68x_dev *dev)
 {
     float var1;
     float var2;
@@ -1027,7 +1027,7 @@ static float calc_temperature(uint32_t temp_adc, struct bme68x_dev *dev)
 }
 
 /* @brief This internal API is used to calculate the pressure value. */
-static float calc_pressure(uint32_t pres_adc, const struct bme68x_dev *dev)
+static float calc_pressure(UInt pres_adc, const struct bme68x_dev *dev)
 {
     float var1;
     float var2;
@@ -1060,7 +1060,7 @@ static float calc_pressure(uint32_t pres_adc, const struct bme68x_dev *dev)
 }
 
 /* This internal API is used to calculate the humidity in integer */
-static float calc_humidity(uint16_t hum_adc, const struct bme68x_dev *dev)
+static float calc_humidity(UShort hum_adc, const struct bme68x_dev *dev)
 {
     float calc_hum;
     float var1;
@@ -1093,7 +1093,7 @@ static float calc_humidity(uint16_t hum_adc, const struct bme68x_dev *dev)
 }
 
 /* This internal API is used to calculate the gas resistance low value in float */
-static float calc_gas_resistance_low(uint16_t gas_res_adc, uint8_t gas_range, const struct bme68x_dev *dev)
+static float calc_gas_resistance_low(UShort gas_res_adc, Byte gas_range, const struct bme68x_dev *dev)
 {
     float calc_gas_res;
     float var1;
@@ -1117,10 +1117,10 @@ static float calc_gas_resistance_low(uint16_t gas_res_adc, uint8_t gas_range, co
 }
 
 /* This internal API is used to calculate the gas resistance value in float */
-static float calc_gas_resistance_high(uint16_t gas_res_adc, uint8_t gas_range)
+static float calc_gas_resistance_high(UShort gas_res_adc, Byte gas_range)
 {
     float calc_gas_res;
-    uint32_t var1 = UINT32_C(262144) >> gas_range;
+    UInt var1 = UINT32_C(262144) >> gas_range;
     int32_t var2 = (int32_t)gas_res_adc - INT32_C(512);
 
     var2 *= INT32_C(3);
@@ -1132,14 +1132,14 @@ static float calc_gas_resistance_high(uint16_t gas_res_adc, uint8_t gas_range)
 }
 
 /* This internal API is used to calculate the heater resistance value using float */
-static uint8_t calc_res_heat(uint16_t temp, const struct bme68x_dev *dev)
+static Byte calc_res_heat(UShort temp, const struct bme68x_dev *dev)
 {
     float var1;
     float var2;
     float var3;
     float var4;
     float var5;
-    uint8_t res_heat;
+    Byte res_heat;
 
     if (temp > 400) /* Cap temperature */
     {
@@ -1152,7 +1152,7 @@ static uint8_t calc_res_heat(uint16_t temp, const struct bme68x_dev *dev)
     var4 = (var1 * (1.0f + (var2 * (float)temp)));
     var5 = (var4 + (var3 * (float)dev->amb_temp));
     res_heat =
-        (uint8_t)(3.4f *
+        (Byte)(3.4f *
                   ((var5 * (4 / (4 + (float)dev->calib.res_heat_range)) *
                     (1 / (1 + ((float)dev->calib.res_heat_val * 0.002f)))) -
                    25));
@@ -1163,10 +1163,10 @@ static uint8_t calc_res_heat(uint16_t temp, const struct bme68x_dev *dev)
 #endif
 
 /* This internal API is used to calculate the gas wait */
-static uint8_t calc_gas_wait(uint16_t dur)
+static Byte calc_gas_wait(UShort dur)
 {
-    uint8_t factor = 0;
-    uint8_t durval;
+    Byte factor = 0;
+    Byte durval;
 
     if (dur >= 0xfc0)
     {
@@ -1180,29 +1180,29 @@ static uint8_t calc_gas_wait(uint16_t dur)
             factor += 1;
         }
 
-        durval = (uint8_t)(dur + (factor * 64));
+        durval = (Byte)(dur + (factor * 64));
     }
 
     return durval;
 }
 
 /* This internal API is used to read a single data of the sensor */
-static int8_t read_field_data(uint8_t index, struct bme68x_data *data, struct bme68x_dev *dev)
+static int8_t read_field_data(Byte index, struct bme68x_data *data, struct bme68x_dev *dev)
 {
     int8_t rslt = BME68X_OK;
-    uint8_t buff[BME68X_LEN_FIELD] = { 0 };
-    uint8_t gas_range_l, gas_range_h;
-    uint32_t adc_temp;
-    uint32_t adc_pres;
-    uint16_t adc_hum;
-    uint16_t adc_gas_res_low, adc_gas_res_high;
-    uint8_t tries = 5;
+    Byte buff[BME68X_LEN_FIELD] = { 0 };
+    Byte gas_range_l, gas_range_h;
+    UInt adc_temp;
+    UInt adc_pres;
+    UShort adc_hum;
+    UShort adc_gas_res_low, adc_gas_res_high;
+    Byte tries = 5;
 
     while ((tries) && (rslt == BME68X_OK))
     {
-        rslt = bme68x_get_regs(((uint8_t)(BME68X_REG_FIELD0 + (index * BME68X_LEN_FIELD_OFFSET))),
+        rslt = BME68X::bme68x_get_regs(((Byte)(BME68X_REG_FIELD0 + (index * BME68X_LEN_FIELD_OFFSET))),
                                buff,
-                               (uint16_t)BME68X_LEN_FIELD,
+                               (UShort)BME68X_LEN_FIELD,
                                dev);
         if (!data)
         {
@@ -1215,11 +1215,11 @@ static int8_t read_field_data(uint8_t index, struct bme68x_data *data, struct bm
         data->meas_index = buff[1];
 
         /* read the raw data from the sensor */
-        adc_pres = (uint32_t)(((uint32_t)buff[2] * 4096) | ((uint32_t)buff[3] * 16) | ((uint32_t)buff[4] / 16));
-        adc_temp = (uint32_t)(((uint32_t)buff[5] * 4096) | ((uint32_t)buff[6] * 16) | ((uint32_t)buff[7] / 16));
-        adc_hum = (uint16_t)(((uint32_t)buff[8] * 256) | (uint32_t)buff[9]);
-        adc_gas_res_low = (uint16_t)((uint32_t)buff[13] * 4 | (((uint32_t)buff[14]) / 64));
-        adc_gas_res_high = (uint16_t)((uint32_t)buff[15] * 4 | (((uint32_t)buff[16]) / 64));
+        adc_pres = (UInt)(((UInt)buff[2] * 4096) | ((UInt)buff[3] * 16) | ((UInt)buff[4] / 16));
+        adc_temp = (UInt)(((UInt)buff[5] * 4096) | ((UInt)buff[6] * 16) | ((UInt)buff[7] / 16));
+        adc_hum = (UShort)(((UInt)buff[8] * 256) | (UInt)buff[9]);
+        adc_gas_res_low = (UShort)((UInt)buff[13] * 4 | (((UInt)buff[14]) / 64));
+        adc_gas_res_high = (UShort)((UInt)buff[15] * 4 | (((UInt)buff[16]) / 64));
         gas_range_l = buff[14] & BME68X_GAS_RANGE_MSK;
         gas_range_h = buff[16] & BME68X_GAS_RANGE_MSK;
         if (dev->variant_id == BME68X_VARIANT_GAS_HIGH)
@@ -1235,15 +1235,15 @@ static int8_t read_field_data(uint8_t index, struct bme68x_data *data, struct bm
 
         if ((data->status & BME68X_NEW_DATA_MSK) && (rslt == BME68X_OK))
         {
-            rslt = bme68x_get_regs(BME68X_REG_RES_HEAT0 + data->gas_index, &data->res_heat, 1, dev);
+            rslt = BME68X::bme68x_get_regs(BME68X_REG_RES_HEAT0 + data->gas_index, &data->res_heat, 1, dev);
             if (rslt == BME68X_OK)
             {
-                rslt = bme68x_get_regs(BME68X_REG_IDAC_HEAT0 + data->gas_index, &data->idac, 1, dev);
+                rslt = BME68X::bme68x_get_regs(BME68X_REG_IDAC_HEAT0 + data->gas_index, &data->idac, 1, dev);
             }
 
             if (rslt == BME68X_OK)
             {
-                rslt = bme68x_get_regs(BME68X_REG_GAS_WAIT0 + data->gas_index, &data->gas_wait, 1, dev);
+                rslt = BME68X::bme68x_get_regs(BME68X_REG_GAS_WAIT0 + data->gas_index, &data->gas_wait, 1, dev);
             }
 
             if (rslt == BME68X_OK)
@@ -1279,15 +1279,15 @@ static int8_t read_field_data(uint8_t index, struct bme68x_data *data, struct bm
 static int8_t read_all_field_data(struct bme68x_data * const data[], struct bme68x_dev *dev)
 {
     int8_t rslt = BME68X_OK;
-    uint8_t buff[BME68X_LEN_FIELD * 3] = { 0 };
-    uint8_t gas_range_l, gas_range_h;
-    uint32_t adc_temp;
-    uint32_t adc_pres;
-    uint16_t adc_hum;
-    uint16_t adc_gas_res_low, adc_gas_res_high;
-    uint8_t off;
-    uint8_t set_val[30] = { 0 }; /* idac, res_heat, gas_wait */
-    uint8_t i;
+    Byte buff[BME68X_LEN_FIELD * 3] = { 0 };
+    Byte gas_range_l, gas_range_h;
+    UInt adc_temp;
+    UInt adc_pres;
+    UShort adc_hum;
+    UShort adc_gas_res_low, adc_gas_res_high;
+    Byte off;
+    Byte set_val[30] = { 0 }; /* idac, res_heat, gas_wait */
+    Byte i;
 
     if (!data[0] && !data[1] && !data[2])
     {
@@ -1296,31 +1296,31 @@ static int8_t read_all_field_data(struct bme68x_data * const data[], struct bme6
 
     if (rslt == BME68X_OK)
     {
-        rslt = bme68x_get_regs(BME68X_REG_FIELD0, buff, (uint32_t) BME68X_LEN_FIELD * 3, dev);
+        rslt = BME68X::bme68x_get_regs(BME68X_REG_FIELD0, buff, (UInt) BME68X_LEN_FIELD * 3, dev);
     }
 
     if (rslt == BME68X_OK)
     {
-        rslt = bme68x_get_regs(BME68X_REG_IDAC_HEAT0, set_val, 30, dev);
+        rslt = BME68X::bme68x_get_regs(BME68X_REG_IDAC_HEAT0, set_val, 30, dev);
     }
 
     for (i = 0; ((i < 3) && (rslt == BME68X_OK)); i++)
     {
-        off = (uint8_t)(i * BME68X_LEN_FIELD);
+        off = (Byte)(i * BME68X_LEN_FIELD);
         data[i]->status = buff[off] & BME68X_NEW_DATA_MSK;
         data[i]->gas_index = buff[off] & BME68X_GAS_INDEX_MSK;
         data[i]->meas_index = buff[off + 1];
 
         /* read the raw data from the sensor */
         adc_pres =
-            (uint32_t) (((uint32_t) buff[off + 2] * 4096) | ((uint32_t) buff[off + 3] * 16) |
-                        ((uint32_t) buff[off + 4] / 16));
+            (UInt) (((UInt) buff[off + 2] * 4096) | ((UInt) buff[off + 3] * 16) |
+                        ((UInt) buff[off + 4] / 16));
         adc_temp =
-            (uint32_t) (((uint32_t) buff[off + 5] * 4096) | ((uint32_t) buff[off + 6] * 16) |
-                        ((uint32_t) buff[off + 7] / 16));
-        adc_hum = (uint16_t) (((uint32_t) buff[off + 8] * 256) | (uint32_t) buff[off + 9]);
-        adc_gas_res_low = (uint16_t) ((uint32_t) buff[off + 13] * 4 | (((uint32_t) buff[off + 14]) / 64));
-        adc_gas_res_high = (uint16_t) ((uint32_t) buff[off + 15] * 4 | (((uint32_t) buff[off + 16]) / 64));
+            (UInt) (((UInt) buff[off + 5] * 4096) | ((UInt) buff[off + 6] * 16) |
+                        ((UInt) buff[off + 7] / 16));
+        adc_hum = (UShort) (((UInt) buff[off + 8] * 256) | (UInt) buff[off + 9]);
+        adc_gas_res_low = (UShort) ((UInt) buff[off + 13] * 4 | (((UInt) buff[off + 14]) / 64));
+        adc_gas_res_high = (UShort) ((UInt) buff[off + 15] * 4 | (((UInt) buff[off + 16]) / 64));
         gas_range_l = buff[off + 14] & BME68X_GAS_RANGE_MSK;
         gas_range_h = buff[off + 16] & BME68X_GAS_RANGE_MSK;
         if (dev->variant_id == BME68X_VARIANT_GAS_HIGH)
@@ -1354,11 +1354,11 @@ static int8_t read_all_field_data(struct bme68x_data * const data[], struct bme6
 }
 
 /* This internal API is used to switch between SPI memory pages */
-static int8_t set_mem_page(uint8_t reg_addr, struct bme68x_dev *dev)
+static int8_t set_mem_page(Byte reg_addr, struct bme68x_dev *dev)
 {
     int8_t rslt;
-    uint8_t reg;
-    uint8_t mem_page;
+    Byte reg;
+    Byte mem_page;
 
     /* Check for null pointers in the device structure*/
     rslt = null_ptr_check(dev);
@@ -1402,7 +1402,7 @@ static int8_t set_mem_page(uint8_t reg_addr, struct bme68x_dev *dev)
 static int8_t get_mem_page(struct bme68x_dev *dev)
 {
     int8_t rslt;
-    uint8_t reg;
+    Byte reg;
 
     /* Check for null pointer in the device structure*/
     rslt = null_ptr_check(dev);
@@ -1423,7 +1423,7 @@ static int8_t get_mem_page(struct bme68x_dev *dev)
 }
 
 /* This internal API is used to limit the max value of a parameter */
-static int8_t boundary_check(uint8_t *value, uint8_t max, struct bme68x_dev *dev)
+static int8_t boundary_check(Byte *value, Byte max, struct bme68x_dev *dev)
 {
     int8_t rslt;
 
@@ -1461,17 +1461,17 @@ static int8_t null_ptr_check(const struct bme68x_dev *dev)
 }
 
 /* This internal API is used to set heater configurations */
-static int8_t set_conf(const struct bme68x_heatr_conf *conf, uint8_t op_mode, uint8_t *nb_conv, struct bme68x_dev *dev)
+static int8_t set_conf(const struct bme68x_heatr_conf *conf, Byte op_mode, Byte *nb_conv, struct bme68x_dev *dev)
 {
     int8_t rslt = BME68X_OK;
-    uint8_t i;
-    uint8_t shared_dur;
-    uint8_t write_len = 0;
-    uint8_t heater_dur_shared_addr = BME68X_REG_SHD_HEATR_DUR;
-    uint8_t rh_reg_addr[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    uint8_t rh_reg_data[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    uint8_t gw_reg_addr[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    uint8_t gw_reg_data[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    Byte i;
+    Byte shared_dur;
+    Byte write_len = 0;
+    Byte heater_dur_shared_addr = BME68X_REG_SHD_HEATR_DUR;
+    Byte rh_reg_addr[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    Byte rh_reg_data[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    Byte gw_reg_addr[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    Byte gw_reg_data[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     switch (op_mode)
     {
@@ -1518,7 +1518,7 @@ static int8_t set_conf(const struct bme68x_heatr_conf *conf, uint8_t op_mode, ui
                 rh_reg_addr[i] = BME68X_REG_RES_HEAT0 + i;
                 rh_reg_data[i] = calc_res_heat(conf->heatr_temp_prof[i], dev);
                 gw_reg_addr[i] = BME68X_REG_GAS_WAIT0 + i;
-                gw_reg_data[i] = (uint8_t) conf->heatr_dur_prof[i];
+                gw_reg_data[i] = (Byte) conf->heatr_dur_prof[i];
             }
 
             (*nb_conv) = conf->profile_len;
@@ -1526,7 +1526,7 @@ static int8_t set_conf(const struct bme68x_heatr_conf *conf, uint8_t op_mode, ui
             shared_dur = calc_heatr_dur_shared(conf->shared_heatr_dur);
             if (rslt == BME68X_OK)
             {
-                rslt = bme68x_set_regs(&heater_dur_shared_addr, &shared_dur, 1, dev);
+                rslt = BME68X::bme68x_set_regs(&heater_dur_shared_addr, &shared_dur, 1, dev);
             }
 
             break;
@@ -1536,12 +1536,12 @@ static int8_t set_conf(const struct bme68x_heatr_conf *conf, uint8_t op_mode, ui
 
     if (rslt == BME68X_OK)
     {
-        rslt = bme68x_set_regs(rh_reg_addr, rh_reg_data, write_len, dev);
+        rslt = BME68X::bme68x_set_regs(rh_reg_addr, rh_reg_data, write_len, dev);
     }
 
     if (rslt == BME68X_OK)
     {
-        rslt = bme68x_set_regs(gw_reg_addr, gw_reg_data, write_len, dev);
+        rslt = BME68X::bme68x_set_regs(gw_reg_addr, gw_reg_data, write_len, dev);
     }
 
     return rslt;
@@ -1549,10 +1549,10 @@ static int8_t set_conf(const struct bme68x_heatr_conf *conf, uint8_t op_mode, ui
 
 /* This internal API is used to calculate the register value for
  * shared heater duration */
-static uint8_t calc_heatr_dur_shared(uint16_t dur)
+static Byte calc_heatr_dur_shared(UShort dur)
 {
-    uint8_t factor = 0;
-    uint8_t heatdurval;
+    Byte factor = 0;
+    Byte heatdurval;
 
     if (dur >= 0x783)
     {
@@ -1561,21 +1561,21 @@ static uint8_t calc_heatr_dur_shared(uint16_t dur)
     else
     {
         /* Step size of 0.477ms */
-        dur = (uint16_t)(((uint32_t)dur * 1000) / 477);
+        dur = (UShort)(((UInt)dur * 1000) / 477);
         while (dur > 0x3F)
         {
             dur = dur >> 2;
             factor += 1;
         }
 
-        heatdurval = (uint8_t)(dur + (factor * 64));
+        heatdurval = (Byte)(dur + (factor * 64));
     }
 
     return heatdurval;
 }
 
 /* This internal API is used sort the sensor data */
-static void sort_sensor_data(uint8_t low_index, uint8_t high_index, struct bme68x_data *field[])
+static void sort_sensor_data(Byte low_index, Byte high_index, struct bme68x_data *field[])
 {
     int16_t meas_index1;
     int16_t meas_index2;
@@ -1698,7 +1698,7 @@ static void sort_sensor_data(uint8_t low_index, uint8_t high_index, struct bme68
 }
 
 /* This internal API is used sort the sensor data */
-static void swap_fields(uint8_t index1, uint8_t index2, struct bme68x_data *field[])
+static void swap_fields(Byte index1, Byte index2, struct bme68x_data *field[])
 {
     struct bme68x_data *temp;
 
@@ -1708,11 +1708,11 @@ static void swap_fields(uint8_t index1, uint8_t index2, struct bme68x_data *fiel
 }
 
 /* This Function is to analyze the sensor data */
-static int8_t analyze_sensor_data(const struct bme68x_data *data, uint8_t n_meas)
+static int8_t analyze_sensor_data(const struct bme68x_data *data, Byte n_meas)
 {
     int8_t rslt = BME68X_OK;
-    uint8_t self_test_failed = 0, i;
-    uint32_t cent_res = 0;
+    Byte self_test_failed = 0, i;
+    UInt cent_res = 0;
 
     if ((data[0].temperature < BME68X_MIN_TEMPERATURE) || (data[0].temperature > BME68X_MAX_TEMPERATURE))
     {
@@ -1739,7 +1739,7 @@ static int8_t analyze_sensor_data(const struct bme68x_data *data, uint8_t n_meas
 
     if (n_meas >= 6)
     {
-        cent_res = (uint32_t)((5 * (data[3].gas_resistance + data[5].gas_resistance)) / (2 * data[4].gas_resistance));
+        cent_res = (UInt)((5 * (data[3].gas_resistance + data[5].gas_resistance)) / (2 * data[4].gas_resistance));
     }
 
     if (cent_res < 6)
@@ -1759,17 +1759,17 @@ static int8_t analyze_sensor_data(const struct bme68x_data *data, uint8_t n_meas
 static int8_t get_calib_data(struct bme68x_dev *dev)
 {
     int8_t rslt;
-    uint8_t coeff_array[BME68X_LEN_COEFF_ALL];
+    Byte coeff_array[BME68X_LEN_COEFF_ALL];
 
-    rslt = bme68x_get_regs(BME68X_REG_COEFF1, coeff_array, BME68X_LEN_COEFF1, dev);
+    rslt = BME68X::bme68x_get_regs(BME68X_REG_COEFF1, coeff_array, BME68X_LEN_COEFF1, dev);
     if (rslt == BME68X_OK)
     {
-        rslt = bme68x_get_regs(BME68X_REG_COEFF2, &coeff_array[BME68X_LEN_COEFF1], BME68X_LEN_COEFF2, dev);
+        rslt = BME68X::bme68x_get_regs(BME68X_REG_COEFF2, &coeff_array[BME68X_LEN_COEFF1], BME68X_LEN_COEFF2, dev);
     }
 
     if (rslt == BME68X_OK)
     {
-        rslt = bme68x_get_regs(BME68X_REG_COEFF3,
+        rslt = BME68X::bme68x_get_regs(BME68X_REG_COEFF3,
                                &coeff_array[BME68X_LEN_COEFF1 + BME68X_LEN_COEFF2],
                                BME68X_LEN_COEFF3,
                                dev);
@@ -1779,14 +1779,14 @@ static int8_t get_calib_data(struct bme68x_dev *dev)
     {
         /* Temperature related coefficients */
         dev->calib.par_t1 =
-            (uint16_t)(BME68X_CONCAT_BYTES(coeff_array[BME68X_IDX_T1_MSB], coeff_array[BME68X_IDX_T1_LSB]));
+            (UShort)(BME68X_CONCAT_BYTES(coeff_array[BME68X_IDX_T1_MSB], coeff_array[BME68X_IDX_T1_LSB]));
         dev->calib.par_t2 =
             (int16_t)(BME68X_CONCAT_BYTES(coeff_array[BME68X_IDX_T2_MSB], coeff_array[BME68X_IDX_T2_LSB]));
         dev->calib.par_t3 = (int8_t)(coeff_array[BME68X_IDX_T3]);
 
         /* Pressure related coefficients */
         dev->calib.par_p1 =
-            (uint16_t)(BME68X_CONCAT_BYTES(coeff_array[BME68X_IDX_P1_MSB], coeff_array[BME68X_IDX_P1_LSB]));
+            (UShort)(BME68X_CONCAT_BYTES(coeff_array[BME68X_IDX_P1_MSB], coeff_array[BME68X_IDX_P1_LSB]));
         dev->calib.par_p2 =
             (int16_t)(BME68X_CONCAT_BYTES(coeff_array[BME68X_IDX_P2_MSB], coeff_array[BME68X_IDX_P2_LSB]));
         dev->calib.par_p3 = (int8_t)coeff_array[BME68X_IDX_P3];
@@ -1800,18 +1800,18 @@ static int8_t get_calib_data(struct bme68x_dev *dev)
             (int16_t)(BME68X_CONCAT_BYTES(coeff_array[BME68X_IDX_P8_MSB], coeff_array[BME68X_IDX_P8_LSB]));
         dev->calib.par_p9 =
             (int16_t)(BME68X_CONCAT_BYTES(coeff_array[BME68X_IDX_P9_MSB], coeff_array[BME68X_IDX_P9_LSB]));
-        dev->calib.par_p10 = (uint8_t)(coeff_array[BME68X_IDX_P10]);
+        dev->calib.par_p10 = (Byte)(coeff_array[BME68X_IDX_P10]);
 
         /* Humidity related coefficients */
         dev->calib.par_h1 =
-            (uint16_t)(((uint16_t)coeff_array[BME68X_IDX_H1_MSB] << 4) |
+            (UShort)(((UShort)coeff_array[BME68X_IDX_H1_MSB] << 4) |
                        (coeff_array[BME68X_IDX_H1_LSB] & BME68X_BIT_H1_DATA_MSK));
         dev->calib.par_h2 =
-            (uint16_t)(((uint16_t)coeff_array[BME68X_IDX_H2_MSB] << 4) | ((coeff_array[BME68X_IDX_H2_LSB]) >> 4));
+            (UShort)(((UShort)coeff_array[BME68X_IDX_H2_MSB] << 4) | ((coeff_array[BME68X_IDX_H2_LSB]) >> 4));
         dev->calib.par_h3 = (int8_t)coeff_array[BME68X_IDX_H3];
         dev->calib.par_h4 = (int8_t)coeff_array[BME68X_IDX_H4];
         dev->calib.par_h5 = (int8_t)coeff_array[BME68X_IDX_H5];
-        dev->calib.par_h6 = (uint8_t)coeff_array[BME68X_IDX_H6];
+        dev->calib.par_h6 = (Byte)coeff_array[BME68X_IDX_H6];
         dev->calib.par_h7 = (int8_t)coeff_array[BME68X_IDX_H7];
 
         /* Gas heater related coefficients */
@@ -1833,10 +1833,10 @@ static int8_t get_calib_data(struct bme68x_dev *dev)
 static int8_t read_variant_id(struct bme68x_dev *dev)
 {
     int8_t rslt;
-    uint8_t reg_data = 0;
+    Byte reg_data = 0;
 
     /* Read variant ID information register */
-    rslt = bme68x_get_regs(BME68X_REG_VARIANT_ID, &reg_data, 1, dev);
+    rslt = BME68X::bme68x_get_regs(BME68X_REG_VARIANT_ID, &reg_data, 1, dev);
 
     if (rslt == BME68X_OK)
     {

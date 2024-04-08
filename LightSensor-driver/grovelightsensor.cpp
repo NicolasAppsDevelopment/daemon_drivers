@@ -13,7 +13,7 @@ GroveLightSensorDriver::GroveLightSensorDriver() : SensirionDriver()
 int16_t GroveLightSensorDriver::getLuminosity(int16_t* luminosity)
 {
     // Specify the register to read by command address
-    uint8_t cmd_buffer[1];
+    Byte cmd_buffer[1];
     cmd_buffer[0] = A2_OUTPUT_VOLTAGE_CMD;
 
     // Write the register address to initiate the read
@@ -24,7 +24,7 @@ int16_t GroveLightSensorDriver::getLuminosity(int16_t* luminosity)
     }
 
     // Read 2 bytes (word) from the specified register
-    uint16_t buffer[1];
+    UShort buffer[1];
     if (read(i2c_device, buffer, sizeof(buffer[0])) != sizeof(buffer[0])) {
         perror("Unable to read from I2C device for light sensor");
         close(i2c_device);
@@ -35,7 +35,7 @@ int16_t GroveLightSensorDriver::getLuminosity(int16_t* luminosity)
     return 0;
 }
 
-int16_t GroveLightSensorDriver::init_address()
+int16_t GroveLightSensorDriver::initAddress()
 {
     // Set the I2C slave address
     if (ioctl(i2c_device, I2C_SLAVE, GROVE_BASE_HAT_I2C_ADDRESS) < 0) {

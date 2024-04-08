@@ -2,6 +2,7 @@
 #define SENSIRIONDRIVER_H
 
 #include "sensirion_config.h"
+#include "../types.h"
 
 /**
  * Linux specific configuration. Adjust the following define to the device path
@@ -33,16 +34,20 @@
 #define SENSIRION_NUM_WORDS(x) (sizeof(x) / SENSIRION_WORD_SIZE)
 #define SENSIRION_MAX_BUFFER_WORDS 32
 
+/**
+* SensirionCommon - Sensirion driver base class for communication
+* @see https://github.com/Sensirion/raspberry-pi-i2c-stc3x 
+*/
 class SensirionDriver
 {
 protected:
     int i2c_device;
-    uint8_t i2c_address;
+    Byte i2c_address;
 
-    uint8_t sensirion_i2c_generate_crc(const uint8_t* data, uint16_t count);
+    Byte sensirion_i2c_generate_crc(const Byte* data, UShort count);
 
-    int8_t sensirion_i2c_check_crc(const uint8_t* data, uint16_t count,
-                                   uint8_t checksum);
+    int8_t sensirion_i2c_check_crc(const Byte* data, UShort count,
+                                   Byte checksum);
 
     /**
      * sensirion_i2c_general_call_reset() - Send a general call reset.
@@ -67,9 +72,9 @@ protected:
      *
      * @return      The number of bytes written to buf
      */
-    uint16_t sensirion_i2c_fill_cmd_send_buf(uint8_t* buf, uint16_t cmd,
-                                             const uint16_t* args,
-                                             uint8_t num_args);
+    UShort sensirion_i2c_fill_cmd_send_buf(Byte* buf, UShort cmd,
+                                             const UShort* args,
+                                             Byte num_args);
 
     /**
      * sensirion_i2c_read_words() - read data words from sensor
@@ -81,8 +86,8 @@ protected:
      *
      * @return      NO_ERROR on success, an error code otherwise
      */
-    int16_t sensirion_i2c_read_words(uint8_t address, uint16_t* data_words,
-                                     uint16_t num_words);
+    int16_t sensirion_i2c_read_words(Byte address, UShort* data_words,
+                                     UShort num_words);
 
     /**
      * sensirion_i2c_read_words_as_bytes() - read data words as byte-stream from
@@ -100,8 +105,8 @@ protected:
      *
      * @return      NO_ERROR on success, an error code otherwise
      */
-    int16_t sensirion_i2c_read_words_as_bytes(uint8_t address, uint8_t* data,
-                                              uint16_t num_words);
+    int16_t sensirion_i2c_read_words_as_bytes(Byte address, Byte* data,
+                                              UShort num_words);
 
     /**
      * sensirion_i2c_write_cmd() - writes a command to the sensor
@@ -110,7 +115,7 @@ protected:
      *
      * @return      NO_ERROR on success, an error code otherwise
      */
-    int16_t sensirion_i2c_write_cmd(uint8_t address, uint16_t command);
+    int16_t sensirion_i2c_write_cmd(Byte address, UShort command);
 
     /**
      * sensirion_i2c_write_cmd_with_args() - writes a command with arguments to the
@@ -122,9 +127,9 @@ protected:
      *
      * @return      NO_ERROR on success, an error code otherwise
      */
-    int16_t sensirion_i2c_write_cmd_with_args(uint8_t address, uint16_t command,
-                                              const uint16_t* data_words,
-                                              uint16_t num_words);
+    int16_t sensirion_i2c_write_cmd_with_args(Byte address, UShort command,
+                                              const UShort* data_words,
+                                              UShort num_words);
 
     /**
      * sensirion_i2c_delayed_read_cmd() - send a command, wait for the sensor to
@@ -137,9 +142,9 @@ protected:
      *
      * @return      NO_ERROR on success, an error code otherwise
      */
-    int16_t sensirion_i2c_delayed_read_cmd(uint8_t address, uint16_t cmd,
-                                           uint32_t delay_us, uint16_t* data_words,
-                                           uint16_t num_words);
+    int16_t sensirion_i2c_delayed_read_cmd(Byte address, UShort cmd,
+                                           UInt delay_us, UShort* data_words,
+                                           UShort num_words);
     /**
      * sensirion_i2c_read_cmd() - reads data words from the sensor after a command
      *                            is issued
@@ -150,8 +155,8 @@ protected:
      *
      * @return      NO_ERROR on success, an error code otherwise
      */
-    int16_t sensirion_i2c_read_cmd(uint8_t address, uint16_t cmd,
-                                   uint16_t* data_words, uint16_t num_words);
+    int16_t sensirion_i2c_read_cmd(Byte address, UShort cmd,
+                                   UShort* data_words, UShort num_words);
 
     /**
      * sensirion_i2c_add_command_to_buffer() - Add a command to the buffer at
@@ -165,23 +170,23 @@ protected:
      *
      * @return        Offset of next free byte in the buffer after writing the data.
      */
-    uint16_t sensirion_i2c_add_command_to_buffer(uint8_t* buffer, uint16_t offset,
-                                                 uint16_t command);
+    UShort sensirion_i2c_add_command_to_buffer(Byte* buffer, UShort offset,
+                                                 UShort command);
 
     /**
-     * sensirion_i2c_add_uint32_t_to_buffer() - Add a uint32_t to the buffer at
+     * sensirion_i2c_add_uint32_t_to_buffer() - Add a UInt to the buffer at
      *                                          offset. Adds 6 bytes to the buffer.
      *
      * @param buffer  Pointer to buffer in which the write frame will be prepared.
      *                Caller needs to make sure that there is enough space after
      *                offset left to write the data into the buffer.
      * @param offset  Offset of the next free byte in the buffer.
-     * @param data    uint32_t to be written into the buffer.
+     * @param data    UInt to be written into the buffer.
      *
      * @return        Offset of next free byte in the buffer after writing the data.
      */
-    uint16_t sensirion_i2c_add_uint32_t_to_buffer(uint8_t* buffer, uint16_t offset,
-                                                  uint32_t data);
+    UShort sensirion_i2c_add_uint32_t_to_buffer(Byte* buffer, UShort offset,
+                                                  UInt data);
 
     /**
      * sensirion_i2c_add_int32_t_to_buffer() - Add a int32_t to the buffer at
@@ -195,23 +200,23 @@ protected:
      *
      * @return        Offset of next free byte in the buffer after writing the data.
      */
-    uint16_t sensirion_i2c_add_int32_t_to_buffer(uint8_t* buffer, uint16_t offset,
+    UShort sensirion_i2c_add_int32_t_to_buffer(Byte* buffer, UShort offset,
                                                  int32_t data);
 
     /**
-     * sensirion_i2c_add_uint16_t_to_buffer() - Add a uint16_t to the buffer at
+     * sensirion_i2c_add_UShort_to_buffer() - Add a UShort to the buffer at
      *                                          offset. Adds 3 bytes to the buffer.
      *
      * @param buffer  Pointer to buffer in which the write frame will be prepared.
      *                Caller needs to make sure that there is enough space after
      *                offset left to write the data into the buffer.
      * @param offset  Offset of the next free byte in the buffer.
-     * @param data    uint16_t to be written into the buffer.
+     * @param data    UShort to be written into the buffer.
      *
      * @return        Offset of next free byte in the buffer after writing the data.
      */
-    uint16_t sensirion_i2c_add_uint16_t_to_buffer(uint8_t* buffer, uint16_t offset,
-                                                  uint16_t data);
+    UShort sensirion_i2c_add_UShort_to_buffer(Byte* buffer, UShort offset,
+                                                  UShort data);
 
     /**
      * sensirion_i2c_add_int16_t_to_buffer() - Add a int16_t to the buffer at
@@ -225,7 +230,7 @@ protected:
      *
      * @return        Offset of next free byte in the buffer after writing the data.
      */
-    uint16_t sensirion_i2c_add_int16_t_to_buffer(uint8_t* buffer, uint16_t offset,
+    UShort sensirion_i2c_add_int16_t_to_buffer(Byte* buffer, UShort offset,
                                                  int16_t data);
 
     /**
@@ -240,7 +245,7 @@ protected:
      *
      * @return        Offset of next free byte in the buffer after writing the data.
      */
-    uint16_t sensirion_i2c_add_float_to_buffer(uint8_t* buffer, uint16_t offset,
+    UShort sensirion_i2c_add_float_to_buffer(Byte* buffer, UShort offset,
                                                float data);
 
     /**
@@ -260,9 +265,9 @@ protected:
      * @return            Offset of next free byte in the buffer after writing the
      *                    data.
      */
-    uint16_t sensirion_i2c_add_bytes_to_buffer(uint8_t* buffer, uint16_t offset,
-                                               const uint8_t* data,
-                                               uint16_t data_length);
+    UShort sensirion_i2c_add_bytes_to_buffer(Byte* buffer, UShort offset,
+                                               const Byte* data,
+                                               UShort data_length);
 
     /**
      * sensirion_i2c_write_data() - Writes data to the Sensor.
@@ -276,8 +281,8 @@ protected:
      *
      * @return        NO_ERROR on success, error code otherwise
      */
-    int16_t sensirion_i2c_write_data(uint8_t address, const uint8_t* data,
-                                     uint16_t data_length);
+    int16_t sensirion_i2c_write_data(Byte address, const Byte* data,
+                                     UShort data_length);
 
     /**
      * sensirion_i2c_read_data_inplace() - Reads data from the Sensor.
@@ -293,8 +298,8 @@ protected:
      *
      * @return            NO_ERROR on success, an error code otherwise
      */
-    int16_t sensirion_i2c_read_data_inplace(uint8_t address, uint8_t* buffer,
-                                            uint16_t expected_data_length);
+    int16_t sensirion_i2c_read_data_inplace(Byte address, Byte* buffer,
+                                            UShort expected_data_length);
 
 public:
     SensirionDriver();
@@ -309,7 +314,7 @@ public:
      * @param bus_idx   Bus index to select
      * @returns         0 on success, an error code otherwise
      */
-    int16_t sensirion_i2c_hal_select_bus(uint8_t bus_idx);
+    int16_t sensirion_i2c_hal_select_bus(Byte bus_idx);
 
     /**
      * Initialize all hard- and software components that are needed for the I2C
@@ -332,7 +337,7 @@ public:
      * @param count   number of bytes to read from I2C and store in the buffer
      * @returns 0 on success, error code otherwise
      */
-    int8_t sensirion_i2c_hal_read(uint8_t address, uint8_t* data, uint16_t count);
+    int8_t sensirion_i2c_hal_read(Byte address, Byte* data, UShort count);
 
     /**
      * Execute one write transaction on the I2C bus, sending a given number of
@@ -345,8 +350,8 @@ public:
      * @param count   number of bytes to read from the buffer and send over I2C
      * @returns 0 on success, error code otherwise
      */
-    int8_t sensirion_i2c_hal_write(uint8_t address, const uint8_t* data,
-                                   uint16_t count);
+    int8_t sensirion_i2c_hal_write(Byte address, const Byte* data,
+                                   UShort count);
 
     /**
      * Sleep for a given number of microseconds. The function should delay the
@@ -364,7 +369,7 @@ public:
      *
      * @param useconds the sleep time in microseconds
      */
-    void sensirion_i2c_hal_sleep_usec(uint32_t useconds);
+    void sensirion_i2c_hal_sleep_usec(UInt useconds);
 
 };
 

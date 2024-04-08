@@ -4,15 +4,13 @@
 #include "SHTC3-driver/shtc3.h"
 #include <unistd.h>
 #include <math.h>
-
-
 #include <stdlib.h>
 #include <time.h>
-
+#include <cfloat>
 
 using namespace std;
 
-void MeasureModule::BME680_measure_clock()
+void MeasureModule::bme680MeasureClock()
 {
     while (true) {
         if (!stopped) {
@@ -21,7 +19,7 @@ void MeasureModule::BME680_measure_clock()
 
                 float pressure;
 
-                error = bme680_get_measure(&pressure);
+                error = BME68XCommon::bme680_get_measure(&pressure);
                 if (error) {
                     if (error != 2) { // DO NOT THROW ERROR IF IT'S A NO NEW DATA ERROR
                         throw DriverError("Impossible de récupérer les données de mesure du capteur BME680. La fonction [bme680_get_measure] a retourné le code d'erreur : " + to_string(error));
@@ -30,10 +28,10 @@ void MeasureModule::BME680_measure_clock()
                     addPressureSample(pressure);
                 }
             } catch (const DriverError& e) {
-                error_array.push_front(e);
+                errorArray.push_front(e);
                 this->stopped = true;
             } catch (...) {
-                error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur BME680."));
+                errorArray.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur BME680."));
                 this->stopped = true;
             }
         }
@@ -42,7 +40,7 @@ void MeasureModule::BME680_measure_clock()
     }
 }
 
-void MeasureModule::LightSensor_measure_clock()
+void MeasureModule::lightSensorMeasureClock()
 {
     while (true) {
         if (!stopped) {
@@ -52,21 +50,20 @@ void MeasureModule::LightSensor_measure_clock()
                 int16_t lum;
                 float luminosity;
 
-                error = light_sensor_driver.getLuminosity(&lum);
+                error = lightSensorDriver.getLuminosity(&lum);
                 if (error) {
                     throw DriverError("Impossible de récupérer les données de mesure du capteur de lumière.");
                 }
 
                 luminosity = ((float)lum / 716.0) * 100.0;
-                printf("Data received from light sensor: \t %f percent\n", luminosity);
 
                 addLuminositySample(luminosity);
 
             } catch (const DriverError& e) {
-                error_array.push_front(e);
+                errorArray.push_front(e);
                 this->stopped = true;
             } catch (...) {
-                error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur de lumière."));
+                errorArray.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur de lumière."));
                 this->stopped = true;
             }
         }
@@ -75,26 +72,52 @@ void MeasureModule::LightSensor_measure_clock()
     }
 }
 
-void MeasureModule::O2_measure_clock()
+void MeasureModule::fiboxMeasureClock()
 {
     while (true) {
         if (!stopped) {
             try {
-                int16_t error = 0;
+                FiboxAnswer* data = fiboxDriver.getMeasure();
 
-                float o2;
-                o2 = ((rand() % 4095) / 4095.0) * 100.0;
-
-                if (error) {
-                    throw DriverError("Impossible de récupérer les données de mesure du capteur d'O2.");
-                } else {
-                    addO2Sample(o2);
+                if (data->isTemperatureEnabled) {
+                    addTemperatureSample((float)data->temperature);
                 }
+                addPressureSample((float)data->pressure);
+
+                float avgTemperature = 0.0f;
+                try
+                {
+                    avgTemperature = getAverage(temperatureArray);
+                }
+                catch (const DriverError&)
+                {
+                    avgTemperature = (float)data->temperature;
+                }
+                oxyCalculator->setTemperature(avgTemperature);
+
+                float avgPressure = 0.0f;
+                try
+                {
+					avgPressure = getAverage(pressureArray);
+				}
+                catch (const DriverError&)
+                {
+					avgPressure = (float)data->pressure;
+				}
+                oxyCalculator->setPressure(avgPressure);
+
+                oxyCalculator->setPhaseAngle((float)data->phase);
+                
+                float o2 = (float)oxyCalculator->getOxygenValue();
+                if (isnanf(o2) || isinff(o2)) {
+					throw DriverError("La valeur d'oxygène calculé n'était pas un nombre. Vérifier vos valeurs de calibration.");
+                }
+                addO2Sample(o2);
             } catch (const DriverError& e) {
-                error_array.push_front(e);
+                errorArray.push_front(e);
                 this->stopped = true;
             } catch (...) {
-                error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur d'O2."));
+                errorArray.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur Fibox."));
                 this->stopped = true;
             }
         }
@@ -103,7 +126,7 @@ void MeasureModule::O2_measure_clock()
     }
 }
 
-void MeasureModule::SHTC3_measure_clock()
+void MeasureModule::shtc3MeasureClock()
 {
     while (true) {
         if (!stopped) {
@@ -116,25 +139,23 @@ void MeasureModule::SHTC3_measure_clock()
                 float temperature;
 
                 //this->SHTC3_driver_mutex.lock();
-                error = SHTC3_driver.shtc1_measure_blocking_read(&temp, &humid);
+                error = shtc3Driver.shtc1_measure_blocking_read(&temp, &humid);
                 //this->SHTC3_driver_mutex.unlock();
 
                 if (error) {
                     throw DriverError("Impossible de récupérer les données de mesure du capteur SHTC3. La fonction [shtc1_measure_blocking_read] a retourné le code d'erreur : " + to_string(error));
                 }
 
-                humidity = (float)humid / 1000.0;
-                temperature = (float)temp / 1000.0;
-
-                printf("Data received from SHTC3: \t %f °C \t %f percent\n", temperature, humidity);
+                humidity = (float)humid / 1000.0f;
+                temperature = (float)temp / 1000.0f;
 
                 addHumiditySample(humidity);
                 addTemperatureSample(temperature);
             } catch (const DriverError& e) {
-                error_array.push_front(e);
+                errorArray.push_front(e);
                 this->stopped = true;
             } catch (...) {
-                error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur SHTC3."));
+                errorArray.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur SHTC3."));
                 this->stopped = true;
             }
         }
@@ -143,39 +164,37 @@ void MeasureModule::SHTC3_measure_clock()
     }
 }
 
-void MeasureModule::STC31_measure_clock()
+void MeasureModule::stc31MeasureClock()
 {
     while (true) {
         if (!stopped) {
             try {
                 int16_t error = 0;
 
-                uint16_t gas_ticks;
+                UShort gas_ticks;
                 int16_t temperature_ticks;
 
                 float gas;
                 float temperature;
 
-                this->STC31_driver_mutex.lock();
-                error = STC31_driver.stc3x_measure_gas_concentration(&gas_ticks, &temperature_ticks);
-                this->STC31_driver_mutex.unlock();
+                this->stc31DriverMutex.lock();
+                error = stc31Driver.stc3x_measure_gas_concentration(&gas_ticks, &temperature_ticks);
+                this->stc31DriverMutex.unlock();
 
                 if (error) {
                     throw DriverError("Impossible de récupérer les données de mesure du capteur STC31. La fonction [stc3x_measure_gas_concentration] a retourné le code d'erreur : " + to_string(error));
                 }
 
-                gas = 100 * ((float)gas_ticks - 16384.0) / 32768.0;
-                temperature = (float)temperature_ticks / 200.0;
+                gas = 100.0f * ((float)gas_ticks - 16384.0f) / 32768.0f;
+                temperature = (float)temperature_ticks / 200.0f;
 
-                printf("Data received from STC31: \t %f °C \t %f percent_vol\n", temperature, gas);
-
-                addCO2Sample(gas);
+                addCo2Sample(gas);
                 addTemperatureSample(temperature);
             } catch (const DriverError& e) {
-                error_array.push_front(e);
+                errorArray.push_front(e);
                 this->stopped = true;
             } catch (...) {
-                error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur STC31."));
+                errorArray.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de mesure du capteur STC31."));
                 this->stopped = true;
             }
         }
@@ -184,55 +203,49 @@ void MeasureModule::STC31_measure_clock()
     }
 }
 
-void MeasureModule::STC31_calibration_clock()
+void MeasureModule::stc31CalibrationClock()
 {
     while (true) {
         if (!stopped) {
             try {
                 float temperature = __FLT_MIN__;
                 try {
-                    temperature = getAverage(temperature_array);
-                } catch (const DriverError& e) {
-                    perror("WARN: Impossible de calibrer le capteur STC31. Série pas assez remplie concernée : température.");
-                }
+                    temperature = getAverage(temperatureArray);
+                } catch (const DriverError& e) {}
 
                 float humidity = __FLT_MIN__;
                 try {
-                    humidity = getAverage(humidity_array);
-                } catch (const DriverError& e) {
-                    perror("WARN: Impossible de calibrer le capteur STC31. Série pas assez remplie concernée : humidité.");
-                }
+                    humidity = getAverage(humidityArray);
+                } catch (const DriverError& e) {}
 
                 float pressure = __FLT_MIN__;
                 try {
-                    pressure = getAverage(pressure_array);
+                    pressure = getAverage(pressureArray);
 
                     if (temperature != __FLT_MIN__ && pressure != __FLT_MIN__) {
                         // convert to pressure at altitude to pressure at sea level
-                        pressure = pressureAtSeaLevel(temperature, pressure, this->altitude);
+                        pressure = pressureAtSeaLevel(temperature, pressure, this->config->altitude);
                     }
-                } catch (const DriverError& e) {
-                    perror("WARN: Impossible de calibrer le capteur STC31. Série pas assez remplie concernée : pression.");
-                }
+                } catch (const DriverError& e) {}
 
                 if (temperature != __FLT_MIN__ && pressure != __FLT_MIN__ && humidity != __FLT_MIN__) {
                     int16_t error = 0;
 
-                    uint16_t hum = humidity * 65535 / 100;
+                    UShort hum = humidity * 65535 / 100;
 
-                    this->STC31_driver_mutex.lock();
-                    error = STC31_driver.stc3x_set_relative_humidity(hum);
-                    this->STC31_driver_mutex.unlock();
+                    this->stc31DriverMutex.lock();
+                    error = stc31Driver.stc3x_set_relative_humidity(hum);
+                    this->stc31DriverMutex.unlock();
 
                     if (error) {
                         throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_relative_humidity] a retourné le code d'erreur : " + to_string(error));
                     }
 
-                    uint16_t pres = pressure / 100; // Pa to mbar (hPa)
+                    UShort pres = pressure / 100; // Pa to mbar (hPa)
 
-                    this->STC31_driver_mutex.lock();
-                    error = STC31_driver.stc3x_set_pressure(pres);
-                    this->STC31_driver_mutex.unlock();
+                    this->stc31DriverMutex.lock();
+                    error = stc31Driver.stc3x_set_pressure(pres);
+                    this->stc31DriverMutex.unlock();
 
                     if (error) {
                         throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_pressure] a retourné le code d'erreur : " + to_string(error));
@@ -240,22 +253,19 @@ void MeasureModule::STC31_calibration_clock()
 
                     int16_t temp = temperature * 200;
 
-                    this->STC31_driver_mutex.lock();
-                    error = STC31_driver.stc3x_set_temperature(temp);
-                    this->STC31_driver_mutex.unlock();
+                    this->stc31DriverMutex.lock();
+                    error = stc31Driver.stc3x_set_temperature(temp);
+                    this->stc31DriverMutex.unlock();
 
                     if (error) {
                         throw DriverError("Impossible de calibrer le capteur STC31. La fonction [stc3x_set_temperature] a retourné le code d'erreur : " + to_string(error));
                     }
-
-                    printf("STC31 calibrated with data: \t %f °C \t %f Pa \t %f percent \t %d m\n", temperature, pressure, humidity, this->altitude);
-
                 }
             } catch (const DriverError& e) {
-                error_array.push_front(e);
+                errorArray.push_front(e);
                 this->stopped = true;
             } catch (...) {
-                error_array.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de calibration du capteur STC31."));
+                errorArray.push_front(DriverError("Une errreur inconnue est survenu dans la boucle de calibration du capteur STC31."));
                 this->stopped = true;
             }
         }
@@ -266,62 +276,62 @@ void MeasureModule::STC31_calibration_clock()
 
 void MeasureModule::addTemperatureSample(float temperature)
 {
-    temperature_array.push_front(temperature);
-    if (temperature_array.size() > NB_OF_SAMPLE * NB_TEMPERATURE_SENSOR) {
-        temperature_array.pop_back();
+    temperatureArray.push_front(temperature);
+    if (temperatureArray.size() > NB_OF_SAMPLE * NB_TEMPERATURE_SENSOR) {
+        temperatureArray.pop_back();
     }
 }
 
 void MeasureModule::addPressureSample(float pressure)
 {
-    pressure_array.push_front(pressure);
-    if (pressure_array.size() > NB_OF_SAMPLE * NB_PRESSURE_SENSOR) {
-        pressure_array.pop_back();
+    pressureArray.push_front(pressure);
+    if (pressureArray.size() > NB_OF_SAMPLE * NB_PRESSURE_SENSOR) {
+        pressureArray.pop_back();
     }
 }
 
 void MeasureModule::addHumiditySample(float humidity)
 {
-    humidity_array.push_front(humidity);
-    if (humidity_array.size() > NB_OF_SAMPLE * NB_HUMIDITY_SENSOR) {
-        humidity_array.pop_back();
+    humidityArray.push_front(humidity);
+    if (humidityArray.size() > NB_OF_SAMPLE * NB_HUMIDITY_SENSOR) {
+        humidityArray.pop_back();
     }
 }
 
-void MeasureModule::addCO2Sample(float co2)
+void MeasureModule::addCo2Sample(float co2)
 {
-    CO2_array.push_front(co2);
-    if (CO2_array.size() > NB_OF_SAMPLE * NB_CO2_SENSOR) {
-        CO2_array.pop_back();
+    co2Array.push_front(co2);
+    if (co2Array.size() > NB_OF_SAMPLE * NB_CO2_SENSOR) {
+        co2Array.pop_back();
     }
 }
 
 void MeasureModule::addO2Sample(float o2)
 {
-    O2_array.push_front(o2);
-    if (O2_array.size() > NB_OF_SAMPLE * NB_O2_SENSOR) {
-        O2_array.pop_back();
+    o2Array.push_front(o2);
+    if (o2Array.size() > NB_OF_SAMPLE * NB_O2_SENSOR) {
+        o2Array.pop_back();
     }
 }
 
 void MeasureModule::addLuminositySample(float luminosity)
 {
-    luminosity_array.push_front(luminosity);
-    if (luminosity_array.size() > NB_OF_SAMPLE * NB_LUMINOSITY_SENSOR) {
-        luminosity_array.pop_back();
+    luminosityArray.push_front(luminosity);
+    if (luminosityArray.size() > NB_OF_SAMPLE * NB_LUMINOSITY_SENSOR) {
+        luminosityArray.pop_back();
     }
 }
 
 float MeasureModule::pressureAtSeaLevel(float temperature, float pressure, float altitude)
 {
     // Constants
-    float gravitational_acceleration = 9.80665;  // Standard gravitational acceleration (m/s^2)
+    float gravitational_acceleration = 9.80665f;  // Standard gravitational acceleration (m/s^2)
 
     // Calculate temperature at the given altitude
-    float temperature_at_altitude = 273.15 + temperature;
+    float temperature_at_altitude = 273.15f + temperature;
 
     // Calculate pressure at sea level using the barometric formula
-    return pressure * exp((gravitational_acceleration * altitude) / (287.058 * temperature_at_altitude));
+    return pressure * exp((gravitational_acceleration * altitude) / (287.058f * temperature_at_altitude));
 }
 
 
@@ -352,149 +362,158 @@ float MeasureModule::getAverage(list<float> array)
     return avg;
 }
 
-string MeasureModule::get_errors()
+list<DriverError> MeasureModule::getErrors()
 {
-    string res = "{\"success\": true, \"errors\": [";
-    for (auto const& e : error_array) {
-        res += "{\"occuredDate\": \"" + e.occuredDate + "\", \"message\": \"" + e.message + "\"},";
-    }
-    if (error_array.size() > 0) {
-        res.pop_back();
-    }
-
-    res += "]}\0";
-    return res;
+    return errorArray;
 }
 
-bool MeasureModule::isInitialising()
+bool MeasureModule::isInitialising() const
 {
     return this->initialising;
 }
 
 MeasureModule::MeasureModule()
 {
-    srand(time(NULL)); // FOR RANDOM WHILE O2 AND LUM ARE NOT IMPLEMENTED
+    this->stc31Driver = STC31Driver();
+    this->shtc3Driver = SHTC3Driver();
+    this->lightSensorDriver = GroveLightSensorDriver();
+    this->fiboxDriver = FiboxDriver();
 
-
-    this->STC31_driver = STC31Driver();
-    this->SHTC3_driver = SHTC3Driver();
-    this->light_sensor_driver = GroveLightSensorDriver();
+    // init default config
+    this->config = new MeasureConfig();
+    oxyCalculator = new OxygenCalculation(config);
 
     reset();
 
-    thread t(&MeasureModule::STC31_measure_clock, this);
+    thread t(&MeasureModule::stc31MeasureClock, this);
     t.detach();
 
-    thread t2(&MeasureModule::SHTC3_measure_clock, this);
+    thread t2(&MeasureModule::shtc3MeasureClock, this);
     t2.detach();
 
-    thread t3(&MeasureModule::BME680_measure_clock, this);
+    thread t3(&MeasureModule::bme680MeasureClock, this);
     t3.detach();
 
-    thread t4(&MeasureModule::LightSensor_measure_clock, this);
+    thread t4(&MeasureModule::lightSensorMeasureClock, this);
     t4.detach();
 
-    thread t5(&MeasureModule::O2_measure_clock, this);
+    thread t5(&MeasureModule::fiboxMeasureClock, this);
     t5.detach();
 
-    thread t6(&MeasureModule::STC31_calibration_clock, this);
+    thread t6(&MeasureModule::stc31CalibrationClock, this);
     t6.detach();
 }
 
 void MeasureModule::reset()
 {
-    thread t(&MeasureModule::reset_function, this);
+    thread t(&MeasureModule::processReset, this);
     t.detach();
 }
 
-void MeasureModule::reset_function()
+void MeasureModule::processReset()
 {
     this->stopped = true;
     this->initialising = true;
-    this->altitude = 0;
-    this->error_array.clear();
-    this->temperature_array.clear();
-    this->humidity_array.clear();
-    this->luminosity_array.clear();
-    this->CO2_array.clear();
-    this->O2_array.clear();
-    this->pressure_array.clear();
+    this->errorArray.clear();
+    this->temperatureArray.clear();
+    this->humidityArray.clear();
+    this->luminosityArray.clear();
+    this->co2Array.clear();
+    this->o2Array.clear();
+    this->pressureArray.clear();
 
     int16_t error = 0;
 
     /* STC31 init */
-    STC31_driver.sensirion_i2c_hal_free();
-    error = STC31_driver.sensirion_i2c_hal_init();
+    stc31Driver.sensirion_i2c_hal_free();
+    error = stc31Driver.sensirion_i2c_hal_init();
     if (error) {
-        error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur STC31. La fonction [sensirion_i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
+        errorArray.push_front(DriverError("Impossible d'initialiser la communication avec le capteur STC31. La fonction [sensirion_i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
         this->initialising = false;
         return;
     }
 
-    uint16_t self_test_output;
-    this->STC31_driver_mutex.lock();
-    error = STC31_driver.stc3x_self_test(&self_test_output);
-    this->STC31_driver_mutex.unlock();
+    UShort self_test_output;
+    this->stc31DriverMutex.lock();
+    error = stc31Driver.stc3x_self_test(&self_test_output);
+    this->stc31DriverMutex.unlock();
     if (error) {
-        error_array.push_front(DriverError("L'auto-test du capteur STC31 a échoué. La fonction [stc3x_self_test] a retourné le code d'erreur : " + to_string(error)));
+        errorArray.push_front(DriverError("L'auto-test du capteur STC31 a échoué. La fonction [stc3x_self_test] a retourné le code d'erreur : " + to_string(error)));
         this->initialising = false;
         return;
     }
 
-    this->STC31_driver_mutex.lock();
-    error = STC31_driver.stc3x_set_binary_gas(0x0001);
-    this->STC31_driver_mutex.unlock();
+    this->stc31DriverMutex.lock();
+    error = stc31Driver.stc3x_set_binary_gas(0x0001);
+    this->stc31DriverMutex.unlock();
     if (error) {
-        error_array.push_front(DriverError("La défénition du mode de relève du CO2 a échoué. La fonction [stc3x_set_binary_gas] a retourné le code d'erreur : " + to_string(error)));
+        errorArray.push_front(DriverError("La défénition du mode de relève du co2 a échoué. La fonction [stc3x_set_binary_gas] a retourné le code d'erreur : " + to_string(error)));
         this->initialising = false;
         return;
     }
 
     /* SHTC3 init */
-    SHTC3_driver.sensirion_i2c_hal_free();
-    error = SHTC3_driver.sensirion_i2c_hal_init();
+    shtc3Driver.sensirion_i2c_hal_free();
+    error = shtc3Driver.sensirion_i2c_hal_init();
     if (error) {
-        error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur SHTC3. La fonction [sensirion_i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
+        errorArray.push_front(DriverError("Impossible d'initialiser la communication avec le capteur SHTC3. La fonction [sensirion_i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
         this->initialising = false;
         return;
     }
 
-    while (SHTC3_driver.shtc1_probe() != STATUS_OK) {
-        printf("SHTC3 sensor probing failed: %d\n", SHTC3_driver.shtc1_probe());
+    int timeout = 0;
+    while (shtc3Driver.shtc1_probe() != STATUS_OK && timeout <= 30) {
+        printf("SHTC3 sensor probing failed: %d\n", shtc3Driver.shtc1_probe());
+        timeout++;
         sleep(1);
     }
-
-    printf("SHTC3 sensor probing successful\n");
+    if (timeout > 30) {
+		errorArray.push_front(DriverError("Impossible de communiquer avec le capteur SHTC3. La fonction [shtc1_probe] n'a pas retourné de réponse positive dans le temps imparti."));
+		this->initialising = false;
+		return;
+	}
 
     /* BME680 init */
-    i2c_hal_free();
-    error = i2c_hal_init();
+    BME68XCommon::i2c_hal_free();
+    error = BME68XCommon::i2c_hal_init();
     if (error) {
-        error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur BME680. La fonction [i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
+        errorArray.push_front(DriverError("Impossible d'initialiser la communication avec le capteur BME680. La fonction [i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
         this->initialising = false;
         return;
     }
 
-    error = bme680_self_test();
+    error = BME68XCommon::bme680_self_test();
     if (error) {
-        error_array.push_front(DriverError("Erreur ignorée. L'auto-test du capteur BME680 a échoué. La fonction [bme680_self_test] a retourné le code d'erreur : " + to_string(error)));
+        errorArray.push_front(DriverError("Erreur ignorée. L'auto-test du capteur BME680 a échoué. La fonction [bme680_self_test] a retourné le code d'erreur : " + to_string(error)));
         // IGNORE ERROR: SELF TEST CAN CAUSE ERROR BUT VALUES ARE OK (JUST FOR PRESSURE)
         /*this->initialising = false;
         return;*/
     }
 
     /* Grove Light Sensor v1.2 ADC init */
-    light_sensor_driver.sensirion_i2c_hal_free();
-    error = light_sensor_driver.sensirion_i2c_hal_init();
+    lightSensorDriver.sensirion_i2c_hal_free();
+    error = lightSensorDriver.sensirion_i2c_hal_init();
     if (error) {
-        error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur de lumière. La fonction [sensirion_i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
+        errorArray.push_front(DriverError("Impossible d'initialiser la communication avec le capteur de lumière. La fonction [sensirion_i2c_hal_init] a retourné le code d'erreur : " + to_string(error)));
         this->initialising = false;
         return;
     }
 
-    error = light_sensor_driver.init_address();
+    error = lightSensorDriver.initAddress();
     if (error) {
-        error_array.push_front(DriverError("Impossible d'initialiser la communication avec le capteur de lumière. La fonction [init_address] a retourné le code d'erreur : " + to_string(error)));
+        errorArray.push_front(DriverError("Impossible d'initialiser la communication avec le capteur de lumière. La fonction [initAddress] a retourné le code d'erreur : " + to_string(error)));
+        this->initialising = false;
+        return;
+    }
+
+    /* Fibox init */
+    try
+    {
+        fiboxDriver.initFiboxCommunication();
+    }
+    catch (const DriverError e)
+    {
+        errorArray.push_front(e);
         this->initialising = false;
         return;
     }
@@ -511,59 +530,64 @@ SensorMeasure* MeasureModule::get()
 
     float temperature = __FLT_MIN__;
     try {
-        temperature = getAverage(temperature_array);
+        temperature = getAverage(temperatureArray);
     } catch (const DriverError& e) {
-        string err_msg = e.message + " Série concernée : température.";
-        error_array.push_front(DriverError(err_msg));
+        String err_msg = e.message + " Série concernée : température.";
+        errorArray.push_front(DriverError(err_msg));
     }
 
     float humidity = __FLT_MIN__;
     try {
-        humidity = getAverage(humidity_array);
+        humidity = getAverage(humidityArray);
     } catch (const DriverError& e) {
-        string err_msg = e.message + " Série concernée : humidité.";
-        error_array.push_front(DriverError(err_msg));
+        String err_msg = e.message + " Série concernée : humidité.";
+        errorArray.push_front(DriverError(err_msg));
     }
 
     float pressure = __FLT_MIN__;
     try {
-        pressure = getAverage(pressure_array);
+        pressure = getAverage(pressureArray);
 
         // convert to pressure at altitude to pressure at sea level
-        pressure = pressureAtSeaLevel(temperature, pressure, this->altitude);
+        pressure = pressureAtSeaLevel(temperature, pressure, this->config->altitude);
     } catch (const DriverError& e) {
-        string err_msg = e.message + " Série concernée : pression.";
-        error_array.push_front(DriverError(err_msg));
+        String err_msg = e.message + " Série concernée : pression.";
+        errorArray.push_front(DriverError(err_msg));
     }
 
-    float CO2 = __FLT_MIN__;
+    float co2 = __FLT_MIN__;
     try {
-        CO2 = getAverage(CO2_array);
+        co2 = getAverage(co2Array);
     } catch (const DriverError& e) {
-        string err_msg = e.message + " Série concernée : CO2.";
-        error_array.push_front(DriverError(err_msg));
+        String err_msg = e.message + " Série concernée : CO2.";
+        errorArray.push_front(DriverError(err_msg));
     }
 
-    float O2 = __FLT_MIN__;
+    float o2 = __FLT_MIN__;
     try {
-        O2 = getAverage(O2_array);
+        o2 = getAverage(o2Array);
     } catch (const DriverError& e) {
-        string err_msg = e.message + " Série concernée : O2.";
-        error_array.push_front(DriverError(err_msg));
+        String err_msg = e.message + " Série concernée : o2.";
+        errorArray.push_front(DriverError(err_msg));
     }
 
     float luminosity = __FLT_MIN__;
     try {
-        luminosity = getAverage(luminosity_array);
+        luminosity = getAverage(luminosityArray);
     } catch (const DriverError& e) {
-        string err_msg = e.message + " Série concernée : luminosité.";
-        error_array.push_front(DriverError(err_msg));
+        String err_msg = e.message + " Série concernée : luminosité.";
+        errorArray.push_front(DriverError(err_msg));
     }
 
-    return new SensorMeasure(temperature, humidity, pressure, CO2, O2, luminosity);
+    return new SensorMeasure(temperature, humidity, pressure, co2, o2, luminosity);
 }
 
-void MeasureModule::setAltitude(int altitude)
+void MeasureModule::setConfig(int altitude, double F1, double M, double DPHI1, double DPHI2, double DKSV1, double DKSV2, double pressure, double cal0, double cal2nd, double t0, double t2nd, double o2Cal2nd, bool calibIsHumid, bool humidMode, bool enableTempFibox)
 {
-    this->altitude = altitude;
+    this->config->set(altitude, F1, M, DPHI1, DPHI2, DKSV1, DKSV2, pressure, cal0, cal2nd, t0, t2nd, o2Cal2nd, calibIsHumid, enableTempFibox, humidMode);
+    this->fiboxDriver.setEnableTempFibox(config->enableTempFibox);
+
+    // clear parameters dependant data
+    co2Array.clear();
+    o2Array.clear();
 }

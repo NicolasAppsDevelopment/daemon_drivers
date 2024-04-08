@@ -5,12 +5,13 @@ SensorMeasure::SensorMeasure(float temp, float hum, float pres, float co2, float
     this->temperature = temp;
     this->humidity = hum;
     this->pressure = pres;
-    this->CO2 = co2;
-    this->O2 = o2;
+    this->co2 = co2;
+    this->o2 = o2;
     this->luminosity = lum;
+    this->complete = (temp != __FLT_MIN__ && hum != __FLT_MIN__ && pres != __FLT_MIN__ && co2 != __FLT_MIN__ && o2 != __FLT_MIN__ && lum != __FLT_MIN__);
 }
 
-string SensorMeasure::getTemperature()
+String SensorMeasure::getTemperature()
 {
     if (temperature == __FLT_MIN__) {
         return "null";
@@ -19,7 +20,7 @@ string SensorMeasure::getTemperature()
     }
 }
 
-string SensorMeasure::getHumidity()
+String SensorMeasure::getHumidity()
 {
     if (humidity == __FLT_MIN__) {
         return "null";
@@ -28,7 +29,7 @@ string SensorMeasure::getHumidity()
     }
 }
 
-string SensorMeasure::getPressure()
+String SensorMeasure::getPressure()
 {
     if (pressure == __FLT_MIN__) {
         return "null";
@@ -37,29 +38,34 @@ string SensorMeasure::getPressure()
     }
 }
 
-string SensorMeasure::getCO2()
+String SensorMeasure::getCo2()
 {
-    if (CO2 == __FLT_MIN__) {
+    if (co2 == __FLT_MIN__) {
         return "null";
     } else {
-        return to_string(CO2);
+        return to_string(co2);
     }
 }
 
-string SensorMeasure::getO2()
+String SensorMeasure::getO2()
 {
-    if (O2 == __FLT_MIN__) {
+    if (o2 == __FLT_MIN__) {
         return "null";
     } else {
-        return to_string(O2);
+        return to_string(o2);
     }
 }
 
-string SensorMeasure::getLuminosity()
+String SensorMeasure::getLuminosity()
 {
     if (luminosity == __FLT_MIN__) {
         return "null";
     } else {
         return to_string(luminosity);
     }
+}
+
+bool SensorMeasure::isComplete()
+{
+    return this->complete;
 }

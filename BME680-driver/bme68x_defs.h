@@ -41,6 +41,8 @@
 #ifndef BME68X_DEFS_H_
 #define BME68X_DEFS_H_
 
+#include "../types.h"
+
 /********************************************************* */
 /*!             Header includes                           */
 /********************************************************* */
@@ -608,7 +610,7 @@
 #define BME68X_HCTRL_POS                          UINT8_C(3)
 
 /* Macro to combine two 8 bit data's to form a 16 bit data */
-#define BME68X_CONCAT_BYTES(msb, lsb)             (((uint16_t)msb << 8) | (uint16_t)lsb)
+#define BME68X_CONCAT_BYTES(msb, lsb)             (((UShort)msb << 8) | (UShort)lsb)
 
 /* Macro to set bits */
 #define BME68X_SET_BITS(reg_data, bitname, data) \
@@ -660,7 +662,7 @@
  * @retval 0 for Success
  * @retval Non-zero for Failure
  */
-typedef BME68X_INTF_RET_TYPE (*bme68x_read_fptr_t)(uint8_t reg_addr, uint8_t *reg_data, uint32_t length);
+typedef BME68X_INTF_RET_TYPE (*bme68x_read_fptr_t)(Byte reg_addr, Byte *reg_data, UInt length);
 
 /*!
  * @brief Bus communication function pointer which should be mapped to
@@ -675,7 +677,7 @@ typedef BME68X_INTF_RET_TYPE (*bme68x_read_fptr_t)(uint8_t reg_addr, uint8_t *re
  * @retval Non-zero for Failure
  *
  */
-typedef BME68X_INTF_RET_TYPE (*bme68x_write_fptr_t)(uint8_t reg_addr, const uint8_t *reg_data, uint32_t length);
+typedef BME68X_INTF_RET_TYPE (*bme68x_write_fptr_t)(Byte reg_addr, const Byte *reg_data, UInt length);
 
 /*!
  * @brief Delay function pointer which should be mapped to
@@ -685,7 +687,7 @@ typedef BME68X_INTF_RET_TYPE (*bme68x_write_fptr_t)(uint8_t reg_addr, const uint
  * @param[in,out] intf_ptr : Void pointer that can enable the linking of descriptors
  *                           for interface related callbacks
  */
-typedef void (*bme68x_delay_us_fptr_t)(uint32_t period);
+typedef void (*bme68x_delay_us_fptr_t)(UInt period);
 
 /*
  * @brief Generic communication function pointer
@@ -716,35 +718,35 @@ enum bme68x_intf {
 struct bme68x_data
 {
     /*! Contains new_data, gasm_valid & heat_stab */
-    uint8_t status;
+    Byte status;
 
     /*! The index of the heater profile used */
-    uint8_t gas_index;
+    Byte gas_index;
 
     /*! Measurement index to track order */
-    uint8_t meas_index;
+    Byte meas_index;
 
     /*! Heater resistance */
-    uint8_t res_heat;
+    Byte res_heat;
 
     /*! Current DAC */
-    uint8_t idac;
+    Byte idac;
 
     /*! Gas wait period */
-    uint8_t gas_wait;
+    Byte gas_wait;
 #ifndef BME68X_USE_FPU
 
     /*! Temperature in degree celsius x100 */
     int16_t temperature;
 
     /*! Pressure in Pascal */
-    uint32_t pressure;
+    UInt pressure;
 
     /*! Humidity in % relative humidity x1000 */
-    uint32_t humidity;
+    UInt humidity;
 
     /*! Gas resistance in Ohms */
-    uint32_t gas_resistance;
+    UInt gas_resistance;
 #else
 
     /*! Temperature in degree celsius */
@@ -769,10 +771,10 @@ struct bme68x_data
 struct bme68x_calib_data
 {
     /*! Calibration coefficient for the humidity sensor */
-    uint16_t par_h1;
+    UShort par_h1;
 
     /*! Calibration coefficient for the humidity sensor */
-    uint16_t par_h2;
+    UShort par_h2;
 
     /*! Calibration coefficient for the humidity sensor */
     int8_t par_h3;
@@ -784,7 +786,7 @@ struct bme68x_calib_data
     int8_t par_h5;
 
     /*! Calibration coefficient for the humidity sensor */
-    uint8_t par_h6;
+    Byte par_h6;
 
     /*! Calibration coefficient for the humidity sensor */
     int8_t par_h7;
@@ -799,7 +801,7 @@ struct bme68x_calib_data
     int8_t par_gh3;
 
     /*! Calibration coefficient for the temperature sensor */
-    uint16_t par_t1;
+    UShort par_t1;
 
     /*! Calibration coefficient for the temperature sensor */
     int16_t par_t2;
@@ -808,7 +810,7 @@ struct bme68x_calib_data
     int8_t par_t3;
 
     /*! Calibration coefficient for the pressure sensor */
-    uint16_t par_p1;
+    UShort par_p1;
 
     /*! Calibration coefficient for the pressure sensor */
     int16_t par_p2;
@@ -835,7 +837,7 @@ struct bme68x_calib_data
     int16_t par_p9;
 
     /*! Calibration coefficient for the pressure sensor */
-    uint8_t par_p10;
+    Byte par_p10;
 #ifndef BME68X_USE_FPU
 
     /*! Variable to store the intermediate temperature coefficient */
@@ -847,7 +849,7 @@ struct bme68x_calib_data
 #endif
 
     /*! Heater resistance range coefficient */
-    uint8_t res_heat_range;
+    Byte res_heat_range;
 
     /*! Heater resistance value coefficient */
     int8_t res_heat_val;
@@ -863,22 +865,22 @@ struct bme68x_calib_data
 struct bme68x_conf
 {
     /*! Humidity oversampling. Refer @ref osx*/
-    uint8_t os_hum;
+    Byte os_hum;
 
     /*! Temperature oversampling. Refer @ref osx */
-    uint8_t os_temp;
+    Byte os_temp;
 
     /*! Pressure oversampling. Refer @ref osx */
-    uint8_t os_pres;
+    Byte os_pres;
 
     /*! Filter coefficient. Refer @ref filter*/
-    uint8_t filter;
+    Byte filter;
 
     /*!
      * Standby time between sequential mode measurement profiles.
      * Refer @ref odr
      */
-    uint8_t odr;
+    Byte odr;
 };
 
 /*
@@ -887,28 +889,28 @@ struct bme68x_conf
 struct bme68x_heatr_conf
 {
     /*! Enable gas measurement. Refer @ref en_dis */
-    uint8_t enable;
+    Byte enable;
 
     /*! Store the heater temperature for forced mode degree Celsius */
-    uint16_t heatr_temp;
+    UShort heatr_temp;
 
     /*! Store the heating duration for forced mode in milliseconds */
-    uint16_t heatr_dur;
+    UShort heatr_dur;
 
     /*! Store the heater temperature profile in degree Celsius */
-    uint16_t *heatr_temp_prof;
+    UShort *heatr_temp_prof;
 
     /*! Store the heating duration profile in milliseconds */
-    uint16_t *heatr_dur_prof;
+    UShort *heatr_dur_prof;
 
     /*! Variable to store the length of the heating profile */
-    uint8_t profile_len;
+    Byte profile_len;
 
     /*!
      * Variable to store heating duration for parallel mode
      * in milliseconds
      */
-    uint16_t shared_heatr_dur;
+    UShort shared_heatr_dur;
 };
 
 /*
@@ -917,7 +919,7 @@ struct bme68x_heatr_conf
 struct bme68x_dev
 {
     /*! Chip Id */
-    uint8_t chip_id;
+    Byte chip_id;
 
     /*!
      * The interface pointer is used to enable the user
@@ -936,13 +938,13 @@ struct bme68x_dev
      *      1      |   BME68X_VARIANT_GAS_HIGH
      * ----------------------------------------
      */
-    uint32_t variant_id;
+    UInt variant_id;
 
     /*! SPI/I2C interface */
     enum bme68x_intf intf;
 
     /*! Memory page used */
-    uint8_t mem_page;
+    Byte mem_page;
 
     /*! Ambient temperature in Degree C*/
     int8_t amb_temp;
@@ -963,7 +965,7 @@ struct bme68x_dev
     BME68X_INTF_RET_TYPE intf_rslt;
 
     /*! Store the info messages */
-    uint8_t info_msg;
+    Byte info_msg;
 };
 
 #endif /* BME68X_DEFS_H_ */

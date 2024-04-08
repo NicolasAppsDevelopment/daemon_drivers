@@ -3,6 +3,7 @@
 
 #include "bme68x.h"
 #include "bme68x_defs.h"
+#include "common.h"
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -31,7 +32,7 @@ static struct bme68x_data data[10];
 #define I2C_READ_FAILED -1
 
 static int i2c_device = -1;
-static uint8_t i2c_address = 0;
+static Byte i2c_address = 0;
 
 
 /**
@@ -44,11 +45,11 @@ static uint8_t i2c_address = 0;
  * @param count   number of bytes to read from I2C and store in the buffer
  * @returns 0 on success, error code otherwise
  */
-int8_t bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len)
+int8_t BME68XCommon::bme68x_i2c_read(Byte reg_addr, Byte *reg_data, UInt len)
 {
     int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
 
-    uint8_t reg[1];
+    Byte reg[1];
     reg[0]=reg_addr;
 
     if (write(i2c_device, reg, 1) != 1) {
@@ -74,11 +75,11 @@ int8_t bme68x_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len)
  * @param count   number of bytes to read from the buffer and send over I2C
  * @returns 0 on success, error code otherwise
  */
-int8_t bme68x_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len)
+int8_t BME68XCommon::bme68x_i2c_write(Byte reg_addr, const Byte *reg_data, UInt len)
 {
     int8_t rslt = 0; /* Return 0 for Success, non-zero for failure */
 
-    uint8_t reg[16];
+    Byte reg[16];
     reg[0]=reg_addr;
 
     for (int i=1; i<(int)len+1; i++)
@@ -98,7 +99,7 @@ int8_t bme68x_i2c_write(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len)
  *
  * @param useconds the sleep time in microseconds
  */
-void bme68x_delay_us(uint32_t useconds) {
+void BME68XCommon::bme68x_delay_us(UInt useconds) {
     usleep(useconds);
 }
 
@@ -143,11 +144,11 @@ int bme680_set_mode_forced(){
     conf.os_hum = BME68X_OS_NONE; // DISABLED: LOW PRECISION
     conf.os_pres = BME68X_OS_1X;
     conf.os_temp = BME68X_OS_NONE; // DISABLED: LOW PRECISION
-    rslt = bme68x_set_conf(&conf,&bme_api_dev);
+    rslt = BME68X::bme68x_set_conf(&conf,&bme_api_dev);
     bme68x_check_rslt("bme68x_set_conf",rslt);
 
     heatr_conf.enable = BME68X_DISABLE; // disable IAQ measurements
-    rslt = bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf,&bme_api_dev);
+    rslt = BME68X::bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf,&bme_api_dev);
     bme68x_check_rslt("bme68x_set_heatr_conf",rslt);
 
     return (int)rslt;
@@ -157,7 +158,7 @@ int bme680_set_mode_forced(){
  * Initialize all hard- and software components that are needed for the I2C
  * communication.
  */
-int i2c_hal_init(void) {
+int BME68XCommon::i2c_hal_init(void) {
     /* open i2c adapter */
     i2c_device = open(I2C_DEVICE_PATH, O_RDWR);
     if (i2c_device == -1) {
@@ -178,7 +179,7 @@ int i2c_hal_init(void) {
     bme_api_dev.intf_ptr = &i2c_address;
     bme_api_dev.amb_temp = 25; /* The ambient temperature in deg C is used for defining the heater temperature */
 
-    rslt = bme68x_init(&bme_api_dev);
+    rslt = BME68X::bme68x_init(&bme_api_dev);
     bme68x_check_rslt("bme68x_init",rslt);
 
     rslt = bme680_set_mode_forced();//default mode, can be overridden by bme688_set_mode()
@@ -189,7 +190,7 @@ int i2c_hal_init(void) {
 /**
  * Release all resources initialized by sensirion_i2c_hal_init().
  */
-void i2c_hal_free(void) {
+void BME68XCommon::i2c_hal_free(void) {
     if (i2c_device >= 0) {
         close(i2c_device);
         i2c_device = -1;
@@ -198,16 +199,11 @@ void i2c_hal_free(void) {
 }
 
 
-int bme680_self_test() {
+int BME68XCommon::bme680_self_test() {
     int8_t rslt;
 
-    rslt = bme68x_selftest_check(&bme_api_dev);
+    rslt = BME68X::bme68x_selftest_check(&bme_api_dev);
     bme68x_check_rslt("bme68x_selftest_check", rslt);
-
-    if (rslt == BME68X_OK)
-    {
-        printf("Self-test passed\n");
-    }
 
     if (rslt == BME68X_E_SELF_TEST)
     {
@@ -218,28 +214,24 @@ int bme680_self_test() {
 }
 
 
-int bme680_get_measure(float* p) {
+int BME68XCommon::bme680_get_measure(float* p) {
     int8_t rslt;
 
-    rslt = bme68x_set_op_mode(BME68X_FORCED_MODE, &bme_api_dev);
+    rslt = BME68X::bme68x_set_op_mode(BME68X_FORCED_MODE, &bme_api_dev);
     bme68x_check_rslt("bme68x_set_op_mode", rslt);
 
     /* Calculate delay period in microseconds */
-    uint32_t del_period;
-    del_period = bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, &bme_api_dev) + (heatr_conf.heatr_dur * 1000);
+    UInt del_period;
+    del_period = BME68X::bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, &bme_api_dev) + (heatr_conf.heatr_dur * 1000);
     bme_api_dev.delay_us(del_period);
 
     /* Check if rslt == BME68X_OK, report or handle if otherwise */
-    uint8_t n_fields;
-    rslt = bme68x_get_data(BME68X_FORCED_MODE, &data, &n_fields, &bme_api_dev);
+    Byte n_fields;
+    rslt = BME68X::bme68x_get_data(BME68X_FORCED_MODE, &data[0], &n_fields, &bme_api_dev);
     bme68x_check_rslt("bme68x_get_data", rslt);
 
     if (n_fields) {
-        //*t = data->temperature;
         *p = data->pressure;
-        //*h = data->humidity;
-
-        printf("Data received from BME680: %f Pa\n", data->pressure);
     }
 
     return (int)rslt;

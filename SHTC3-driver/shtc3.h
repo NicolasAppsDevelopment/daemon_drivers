@@ -10,7 +10,8 @@
 #ifndef SHTC1_H
 #define SHTC1_H
 
-#include "Sensirion-driver-base/sensirion_driver.h"
+#include "../Sensirion-driver-base/sensirion_driver.h"
+#include "../types.h"
 
 #define STATUS_OK 0
 #define STATUS_ERR_BAD_DATA (-1)
@@ -33,11 +34,15 @@
 #define SHTC3_CMD_WAKEUP 0x3517
 #define SHTC1_ADDRESS 0x70
 
+/**
+* SHTC3Driver - SHTC3 driver class
+* @see https://github.com/Sensirion/shtc3-stm-sample-project
+*/
 class SHTC3Driver : public SensirionDriver {
 public:
     SHTC3Driver();
 
-    uint16_t shtc1_cmd_measure;
+    UShort shtc1_cmd_measure;
 
     /**
      * Detects if a sensor is connected by reading out the ID register.
@@ -146,7 +151,7 @@ public:
      *
      * @param enable_low_power_mode 1 to enable low power mode, 0 to disable
      */
-    void shtc1_enable_low_power_mode(uint8_t enable_low_power_mode);
+    void shtc1_enable_low_power_mode(Byte enable_low_power_mode);
 
     /**
      * Read out the serial number
@@ -154,12 +159,12 @@ public:
      * @param serial    the address for the result of the serial number
      * @return          0 if the command was successful, else an error code.
      */
-    int16_t shtc1_read_serial(uint32_t* serial);
+    int16_t shtc1_read_serial(UInt* serial);
 
     /**
      * Return the driver version
      *
-     * @return Driver version string
+     * @return Driver version String
      */
     const char* shtc1_get_driver_version(void);
 
@@ -168,7 +173,7 @@ public:
      *
      * @return The configured i2c address
      */
-    uint8_t shtc1_get_configured_address(void);
+    Byte shtc1_get_configured_address(void);
 };
 
 #endif /* SHTC1_H */
