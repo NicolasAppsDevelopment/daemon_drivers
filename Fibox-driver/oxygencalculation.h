@@ -41,29 +41,23 @@ public:
     /**
      * @brief Set the pressure value in Pascal
      *
-     * @param valInPa The pressure value in Pascal
+     * @param valInPa value
      */
     void setPressure(double valInPa);
 
     /**
      * @brief Set the temperature value in Celsius
      *
-     * @param valInC The temperature value in Celsius
+     * @param valInC value
      */
     void setTemperature(double valInC);
 
     /**
      * @brief Set the phase angle value in degrees
      *
-     * @param valInDegres The phase angle value in degrees
+     * @param valInDegres value
      */
     void setPhaseAngle(double valInDegres);
-
-    /**
-     * @brief Get the oxygen value
-     *
-     * @return The oxygen value
-     */
     double getOxygenValue();
 };
 

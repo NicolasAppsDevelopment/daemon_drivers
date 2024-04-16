@@ -1,0 +1,19 @@
+var searchData=
+[
+  ['sensirion_5fcommand_5fsize_0',['SENSIRION_COMMAND_SIZE',['../sensirion__common_8h.html#a303f7072408255432175fa9455494b99',1,'SENSIRION_COMMAND_SIZE:&#160;sensirion_common.h'],['../sensirion__driver_8h.html#a303f7072408255432175fa9455494b99',1,'SENSIRION_COMMAND_SIZE:&#160;sensirion_driver.h']]],
+  ['sensirion_5fmax_5fbuffer_5fwords_1',['SENSIRION_MAX_BUFFER_WORDS',['../sensirion__common_8h.html#a51ffd86e39824eb4f39f9eb8f2faf707',1,'SENSIRION_MAX_BUFFER_WORDS:&#160;sensirion_common.h'],['../sensirion__driver_8h.html#a51ffd86e39824eb4f39f9eb8f2faf707',1,'SENSIRION_MAX_BUFFER_WORDS:&#160;sensirion_driver.h']]],
+  ['sensirion_5fnum_5fwords_2',['SENSIRION_NUM_WORDS',['../sensirion__common_8h.html#abe178babe95c5265a5b6c3353e0a4f63',1,'SENSIRION_NUM_WORDS:&#160;sensirion_common.h'],['../sensirion__driver_8h.html#abe178babe95c5265a5b6c3353e0a4f63',1,'SENSIRION_NUM_WORDS:&#160;sensirion_driver.h']]],
+  ['sensirion_5fword_5fsize_3',['SENSIRION_WORD_SIZE',['../sensirion__common_8h.html#a2411c194647ae2c8d965cc731926f058',1,'SENSIRION_WORD_SIZE:&#160;sensirion_common.h'],['../sensirion__driver_8h.html#a2411c194647ae2c8d965cc731926f058',1,'SENSIRION_WORD_SIZE:&#160;sensirion_driver.h']]],
+  ['shtc1_5faddress_4',['SHTC1_ADDRESS',['../shtc3_8h.html#a5450b48041b1ccc524a952f82dedb2d1',1,'shtc3.h']]],
+  ['shtc1_5fcmd_5fduration_5fusec_5',['SHTC1_CMD_DURATION_USEC',['../shtc3_8h.html#a258e8bbe09e6583c1814b582b69d3453',1,'shtc3.h']]],
+  ['shtc1_5fcmd_5fmeasure_5fhpm_6',['SHTC1_CMD_MEASURE_HPM',['../shtc3_8h.html#ac579d54e89cc4cd3a16bd684586d58ef',1,'shtc3.h']]],
+  ['shtc1_5fcmd_5fmeasure_5flpm_7',['SHTC1_CMD_MEASURE_LPM',['../shtc3_8h.html#a151c7ed39c9f833c4c2ea247d173d59b',1,'shtc3.h']]],
+  ['shtc1_5fmeasurement_5fduration_5fusec_8',['SHTC1_MEASUREMENT_DURATION_USEC',['../shtc3_8h.html#a79c53ffc5a749720180d51ff6fd296fb',1,'shtc3.h']]],
+  ['shtc3_5fcmd_5fsleep_9',['SHTC3_CMD_SLEEP',['../shtc3_8h.html#a2ed8722346dfca8defaaa13b8cedd697',1,'shtc3.h']]],
+  ['shtc3_5fcmd_5fwakeup_10',['SHTC3_CMD_WAKEUP',['../shtc3_8h.html#ac926995ef3f8178fad716eafd88b67ef',1,'shtc3.h']]],
+  ['status_5fcrc_5ffail_11',['STATUS_CRC_FAIL',['../shtc3_8h.html#a88e9ad2752acfa79efa5f4cf30ce252f',1,'shtc3.h']]],
+  ['status_5ferr_5fbad_5fdata_12',['STATUS_ERR_BAD_DATA',['../shtc3_8h.html#aa180f2c480b3cbe69f70136fe0ce18e0',1,'shtc3.h']]],
+  ['status_5fok_13',['STATUS_OK',['../shtc3_8h.html#a2403320c41f08e7567cb169de5db66b3',1,'shtc3.h']]],
+  ['status_5funknown_5fdevice_14',['STATUS_UNKNOWN_DEVICE',['../shtc3_8h.html#a6bbd69a9bc99e6db05c47d0c3c0ae039',1,'shtc3.h']]],
+  ['stc3x_5fi2c_5faddress_15',['STC3X_I2C_ADDRESS',['../stc31_8h.html#ac0da56d0589cd6afd86540f6f3dfef35',1,'stc31.h']]]
+];
